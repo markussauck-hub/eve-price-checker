@@ -30,8 +30,7 @@ jobs:
         run: |
           set +e
           out=$(python tests/smoke_esi.py 2>&1); rc=$?
-          msg=$(printf '%s' "$out" | tail -n 12 | sed ':a;N;$!ba;s/
-/%0A/g')
+          msg=$(printf '%s' "$out" | tail -n 12 | tr '\n' '~' | sed 's/~/%0A/g')
           if [ $rc -ne 0 ]; then echo "::error title=ESI-Test::$msg"; exit 1; fi
           echo "::notice title=ESI-Test::$msg"
 
@@ -56,8 +55,7 @@ jobs:
         run: |
           set +e
           out=$(pyinstaller --noconfirm --clean EVE_Price_Checker.spec 2>&1); rc=$?
-          msg=$(printf '%s' "$out" | tail -n 12 | sed ':a;N;$!ba;s/
-/%0A/g')
+          msg=$(printf '%s' "$out" | tail -n 12 | tr '\n' '~' | sed 's/~/%0A/g')
           if [ $rc -ne 0 ]; then echo "::error title=PyInstaller::$msg"; exit 1; fi
           echo "::notice title=Schritt::PyInstaller OK"
 
