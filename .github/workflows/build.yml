@@ -54,8 +54,7 @@ jobs:
               assert res.get("state") == "normal", res
               print("::notice title=GUI::OK - " + res["status"])
           except BaseException:
-              print("::error title=GUI::" + traceback.format_exc().replace("
-", "%0A"))
+              print("::error title=GUI::" + traceback.format_exc().replace(chr(10), "%0A"))
               sys.exit(1)
 
       - name: exe bauen
