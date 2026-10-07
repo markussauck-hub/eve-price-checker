@@ -36,19 +36,27 @@ jobs:
 
       - name: GUI-Start-Test
         shell: python
+        env:
+          PYTHONUTF8: "1"
         run: |
-          import tkinter as tk, eve_price_checker as m
-          m.load_item_db = lambda: ({"Tritanium": 34}, None)
-          root = tk.Tk(); app = m.PriceCheckerApp(root)
-          def check():
-              root.update()
-              assert app.combo.cget("state") == "normal", app.combo.cget("state")
-              print("::notice title=GUI::OK –", app.status_label.cget("text"))
-              root.destroy()
+          import traceback, sys
           try:
+              import tkinter as tk, eve_price_checker as m
+              m.load_item_db = lambda: ({"Tritanium": 34}, None)
+              root = tk.Tk(); app = m.PriceCheckerApp(root)
+              res = {}
+              def check():
+                  root.update()
+                  res["state"] = app.combo.cget("state")
+                  res["status"] = app.status_label.cget("text")
+                  root.destroy()
               root.after(1500, check); root.mainloop()
-          except Exception as e:
-              print(f"::error title=GUI::{e!r}"); raise
+              assert res.get("state") == "normal", res
+              print("::notice title=GUI::OK - " + res["status"])
+          except BaseException:
+              print("::error title=GUI::" + traceback.format_exc().replace("
+", "%0A"))
+              sys.exit(1)
 
       - name: exe bauen
         shell: bash
