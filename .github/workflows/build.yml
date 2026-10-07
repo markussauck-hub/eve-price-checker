@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Abhängigkeiten
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Live-Test gegen ESI
+        run: python tests/smoke_esi.py
+
+      - name: GUI-Start-Test
+        shell: python
+        run: |
+          import tkinter as tk, eve_price_checker as m
+          m.load_item_db = lambda: ({"Tritanium": 34}, None)
+          root = tk.Tk(); app = m.PriceCheckerApp(root)
+          def check():
+              root.update()
+              assert app.combo.cget("state") == "normal", app.combo.cget("state")
+              print("GUI OK:", app.status_label.cget("text"))
+              root.destroy()
+          root.after(1500, check); root.mainloop()
+
+      - name: exe bauen
+        run: pyinstaller --noconfirm --clean EVE_Price_Checker.spec
+
+      - name: exe prüfen
+        shell: pwsh
+        run: |
+          $f = Get-Item dist/EVE_Price_Checker.exe
+          "{0:N1} MB" -f ($f.Length / 1MB)
+          $p = Start-Process $f.FullName -PassThru
+          Start-Sleep 8
+          if ($p.HasExited) { throw "exe beendet sich sofort (ExitCode $($p.ExitCode))" }
+          Stop-Process $p -Force
+          "exe läuft"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EVE_Price_Checker
+          path: dist/EVE_Price_Checker.exe
+
+      - name: Release (nur bei Tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/EVE_Price_Checker.exe
