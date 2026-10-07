@@ -14,7 +14,11 @@ Kleines Desktop-Tool (Python/Tkinter) für **EVE Online**: zeigt für ein Item d
 - Paralleles Abrufen aller Hubs, HTTP-Retries bei 502/503/504, ESI-Pagination
 - Dunkles Theme, unter Windows 10/11 mit dunkler Titelleiste
 
-## Starten
+## Download
+
+Fertige exe: [Releases](https://github.com/markussauck-hub/eve-price-checker/releases/latest) → `EVE_Price_Checker.exe`
+
+## Starten aus dem Quellcode
 
 ```bash
 pip install -r requirements.txt
@@ -37,6 +41,12 @@ pyinstaller EVE_Price_Checker.spec
 ```
 
 Ergebnis: `dist/EVE_Price_Checker.exe` (Onefile, ohne Konsolenfenster, mit LincolnSoft-Icon).
+
+### GitHub Actions
+
+Jeder Push auf `main` baut die exe auf `windows-latest` (Python 3.14), testet live gegen ESI (Tritanium an allen Hubs), startet GUI und exe probeweise und legt die exe als Artefakt ab.
+
+Neues Release: *Actions → Build → Run workflow* mit Version, z. B. `v1.1.0`. Die exe landet dann unter Releases.
 
 ## Konfiguration
 
