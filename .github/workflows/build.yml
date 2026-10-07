@@ -21,7 +21,9 @@ jobs:
           allow-prereleases: true
 
       - name: Abhängigkeiten
-        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+        run: |
+          python -m pip install -r requirements.txt -r requirements-dev.txt
+          echo "::notice title=Schritt::Abhängigkeiten OK ($(python --version))"
 
       - name: Live-Test gegen ESI
         shell: pwsh
@@ -39,12 +41,19 @@ jobs:
           def check():
               root.update()
               assert app.combo.cget("state") == "normal", app.combo.cget("state")
-              print("GUI OK:", app.status_label.cget("text"))
+              print("::notice title=GUI::OK –", app.status_label.cget("text"))
               root.destroy()
-          root.after(1500, check); root.mainloop()
+          try:
+              root.after(1500, check); root.mainloop()
+          except Exception as e:
+              print(f"::error title=GUI::{e!r}"); raise
 
       - name: exe bauen
-        run: pyinstaller --noconfirm --clean EVE_Price_Checker.spec
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean EVE_Price_Checker.spec 2>&1 | Tee-Object -Variable out | Out-Null
+          if ($LASTEXITCODE -ne 0) { "::error title=PyInstaller::$(($out | Select-Object -Last 10) -join ' %0A ')"; exit 1 }
+          "::notice title=Schritt::PyInstaller OK"
 
       - name: exe prüfen
         shell: pwsh
@@ -53,9 +62,9 @@ jobs:
           "{0:N1} MB" -f ($f.Length / 1MB)
           $p = Start-Process $f.FullName -PassThru
           Start-Sleep 8
-          if ($p.HasExited) { throw "exe beendet sich sofort (ExitCode $($p.ExitCode))" }
+          if ($p.HasExited) { "::error title=exe::beendet sich sofort (ExitCode $($p.ExitCode))"; exit 1 }
           Stop-Process $p -Force
-          "exe läuft"
+          "::notice title=exe::läuft – {0:N1} MB" -f ($f.Length / 1MB)
 
       - uses: actions/upload-artifact@v5
         with:
