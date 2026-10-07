@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# PyInstaller
+build/
+dist/
+
+# Laufzeit-Cache (liegt normalerweise in %LOCALAPPDATA%\EVEPriceChecker)
+eve_items_cache.json
+eve_items_cache.json.tmp
