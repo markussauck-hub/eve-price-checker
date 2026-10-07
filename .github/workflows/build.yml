@@ -39,7 +39,8 @@ jobs:
         env:
           PYTHONUTF8: "1"
         run: |
-          import traceback, sys
+          import traceback, sys, os
+          sys.path.insert(0, os.getcwd())
           try:
               import tkinter as tk, eve_price_checker as m
               m.load_item_db = lambda: ({"Tritanium": 34}, None)
