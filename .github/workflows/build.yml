@@ -48,7 +48,7 @@ jobs:
               res = {}
               def check():
                   root.update()
-                  res["state"] = app.combo.cget("state")
+                  res["state"] = str(app.combo.cget("state"))
                   res["status"] = app.status_label.cget("text")
                   root.destroy()
               root.after(1500, check); root.mainloop()
