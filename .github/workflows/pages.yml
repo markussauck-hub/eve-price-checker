@@ -1,0 +1,72 @@
+name: Web – Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", ".github/workflows/pages.yml"]
+  schedule:
+    - cron: "23 5 * * 2"   # jeden Dienstag 05:23 UTC (nach dem üblichen Patch-Day) – neue Items
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Item-Liste aus ESI bauen
+        run: python web/build_data.py --out site/items.json
+
+      - name: Seite zusammenstellen
+        run: cp web/index.html site/
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Live-Seite prüfen
+        run: |
+          sleep 20
+          python web/tests/live_check.py "${{ needs.deploy.outputs.url }}"
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: live-screenshot
+          path: live.png

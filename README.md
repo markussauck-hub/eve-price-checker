@@ -14,7 +14,22 @@ Kleines Desktop-Tool (Python/Tkinter) für **EVE Online**: zeigt für ein Item d
 - Paralleles Abrufen aller Hubs, HTTP-Retries bei 502/503/504, ESI-Pagination
 - Dunkles Theme, unter Windows 10/11 mit dunkler Titelleiste
 
-## Download
+## Im Browser
+
+**https://markussauck-hub.github.io/eve-price-checker/**
+
+Gleiche Funktionen wie die Desktop-Version, im LincolnSoft-Look des Invention Helpers. Preise kommen live aus ESI direkt im Browser, nichts zu installieren. Zusätzlich: Accounting-Skill wählbar (wird im Browser gespeichert), Anzahl Orders und Spanne je Hub, Direktlink pro Item (z. B. `…/#34` für Tritanium).
+
+| Datei | Zweck |
+|---|---|
+| `web/index.html` | Die komplette Seite (HTML/CSS/JS, keine Abhängigkeiten) |
+| `web/build_data.py` | Holt alle handelbaren Items aus ESI und erzeugt `items.json` |
+| `web/tests/live_check.py` | Prüft die veröffentlichte Seite mit Chromium gegen die echte ESI |
+| `.github/workflows/pages.yml` | Baut `items.json`, veröffentlicht auf GitHub Pages und testet live – bei Änderungen unter `web/`, jeden Dienstag und manuell |
+
+Lokal testen: `python web/build_data.py --out web/items.json`, dann `python -m http.server -d web 8000` und http://localhost:8000 öffnen.
+
+## Download (Desktop)
 
 Fertige exe: [Releases](https://github.com/markussauck-hub/eve-price-checker/releases/latest) → `EVE_Price_Checker.exe`
 
