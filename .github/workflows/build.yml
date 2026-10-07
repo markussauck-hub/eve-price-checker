@@ -26,11 +26,14 @@ jobs:
           echo "::notice title=Schritt::Abhängigkeiten OK ($(python --version))"
 
       - name: Live-Test gegen ESI
-        shell: pwsh
+        shell: bash
         run: |
-          python tests/smoke_esi.py 2>&1 | Tee-Object -Variable out
-          if ($LASTEXITCODE -ne 0) { "::error title=ESI-Test::$(($out | Select-Object -Last 8) -join ' %0A ')"; exit 1 }
-          "::notice title=ESI-Test::$(($out | Select-Object -Last 9) -join ' %0A ')"
+          set +e
+          out=$(python tests/smoke_esi.py 2>&1); rc=$?
+          msg=$(printf '%s' "$out" | tail -n 12 | sed ':a;N;$!ba;s/
+/%0A/g')
+          if [ $rc -ne 0 ]; then echo "::error title=ESI-Test::$msg"; exit 1; fi
+          echo "::notice title=ESI-Test::$msg"
 
       - name: GUI-Start-Test
         shell: python
@@ -49,11 +52,14 @@ jobs:
               print(f"::error title=GUI::{e!r}"); raise
 
       - name: exe bauen
-        shell: pwsh
+        shell: bash
         run: |
-          pyinstaller --noconfirm --clean EVE_Price_Checker.spec 2>&1 | Tee-Object -Variable out | Out-Null
-          if ($LASTEXITCODE -ne 0) { "::error title=PyInstaller::$(($out | Select-Object -Last 10) -join ' %0A ')"; exit 1 }
-          "::notice title=Schritt::PyInstaller OK"
+          set +e
+          out=$(pyinstaller --noconfirm --clean EVE_Price_Checker.spec 2>&1); rc=$?
+          msg=$(printf '%s' "$out" | tail -n 12 | sed ':a;N;$!ba;s/
+/%0A/g')
+          if [ $rc -ne 0 ]; then echo "::error title=PyInstaller::$msg"; exit 1; fi
+          echo "::notice title=Schritt::PyInstaller OK"
 
       - name: exe prüfen
         shell: pwsh
