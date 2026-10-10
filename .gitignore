@@ -15,3 +15,5 @@ eve_items_cache.json.tmp
 # Web: lokal gebaute Item-Liste und Testscreenshot
 web/items.json
 live.png
+web/build.json
+live_mats.png

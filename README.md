@@ -18,16 +18,16 @@ Kleines Desktop-Tool (Python/Tkinter) für **EVE Online**: zeigt für ein Item d
 
 **https://markussauck-hub.github.io/eve-price-checker/**
 
-Gleiche Funktionen wie die Desktop-Version, im LincolnSoft-Look des Invention Helpers. Preise kommen live aus ESI direkt im Browser, nichts zu installieren. Zusätzlich: Accounting-Skill wählbar (wird im Browser gespeichert), Anzahl Orders und Spanne je Hub, Direktlink pro Item (z. B. `…/#34` für Tritanium).
+Gleiche Funktionen wie die Desktop-Version, im LincolnSoft-Look des Invention Helpers. Preise kommen live aus ESI direkt im Browser, nichts zu installieren. Zusätzlich: Baumaterialien des gewählten Items (Blueprint bzw. Reaktion aus dem SDE, Runs und ME einstellbar, Multibuy-Knopf), Accounting-Skill wählbar (wird im Browser gespeichert), Anzahl Orders und Spanne je Hub, Direktlink pro Item (z. B. `…/#34` für Tritanium).
 
 | Datei | Zweck |
 |---|---|
 | `web/index.html` | Die komplette Seite (HTML/CSS/JS, keine Abhängigkeiten) |
-| `web/build_data.py` | Holt alle handelbaren Items aus ESI und erzeugt `items.json` |
+| `web/build_data.py` | Erzeugt `items.json` (handelbare Items aus ESI) und `build.json` (Bau-Rezepte aus dem Fuzzwork-SDE) |
 | `web/tests/live_check.py` | Prüft die veröffentlichte Seite mit Chromium gegen die echte ESI |
 | `.github/workflows/pages.yml` | Baut `items.json`, veröffentlicht auf GitHub Pages und testet live – bei Änderungen unter `web/`, jeden Dienstag und manuell |
 
-Lokal testen: `python web/build_data.py --out web/items.json`, dann `python -m http.server -d web 8000` und http://localhost:8000 öffnen.
+Lokal testen: `python web/build_data.py --out web/items.json --build-out web/build.json`, dann `python -m http.server -d web 8000` und http://localhost:8000 öffnen.
 
 ## Download (Desktop)
 

@@ -27,8 +27,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Item-Liste aus ESI bauen
-        run: python web/build_data.py --out site/items.json
+      - name: Item-Liste (ESI) und Bau-Rezepte (Fuzzwork SDE) bauen
+        run: python web/build_data.py --out site/items.json --build-out site/build.json
 
       - name: Seite zusammenstellen
         run: cp web/index.html site/
@@ -69,4 +69,4 @@ jobs:
         if: always()
         with:
           name: live-screenshot
-          path: live.png
+          path: live*.png
