@@ -527,7 +527,7 @@ const STATIONS = [
 const TOOL_URL = "https://markussauck-hub.github.io/eve-invention-helper/";
 const BASE_TAX = 0.075;          // Sales Tax ohne Skill
 const ROUTES_SHOWN = 3;
-const MAX_SUGGESTIONS = 100;
+const CHUNK = 250;               // Listeneinträge, die pro Schritt gerendert werden (Rest beim Scrollen)
 const ROMAN = ["0", "I", "II", "III", "IV", "V"];
 const STATUS = { ok: "var(--pos)", busy: "var(--accent)", warn: "var(--warn)", err: "var(--neg)" };
 
@@ -547,7 +547,7 @@ const store = {
 };
 
 // ---------------------------------------------------------------- Zustand
-let ITEMS = [], BY_ID = new Map(), filtered = [], selIdx = -1, current = null, generated = "";
+let ITEMS = [], BY_ID = new Map(), filtered = [], rendered = 0, selIdx = -1, current = null, generated = "";
 let results = null, loadToken = 0;
 let BUILD = null, matList = [];
 let accounting = Math.min(5, Math.max(0, Number(store.get("accounting", 5)) || 0));
@@ -691,7 +691,7 @@ async function init() {
 function applyFilter() {
   const q = $("search").value.trim().toLowerCase();
   if (!q) {
-    filtered = ITEMS.slice(0, MAX_SUGGESTIONS);
+    filtered = ITEMS;
   } else {
     // Treffer am Wortanfang zuerst, dann Teilstring-Treffer (wie Desktop)
     const prefix = [], contains = [];
@@ -701,19 +701,36 @@ function applyFilter() {
     }
     filtered = prefix.concat(contains);
   }
-  const total = filtered.length;
-  filtered = filtered.slice(0, MAX_SUGGESTIONS);
   selIdx = current ? filtered.indexOf(current) : -1;
-  $("list").innerHTML = filtered.length
-    ? filtered.map((it, i) => `<li role="option" data-i="${i}" aria-selected="${i === selIdx}">${esc(it.name)}</li>`).join("")
-    : `<li class="empty">Kein handelbares Item gefunden.</li>`;
-  $("count").textContent = q
-    ? `${fmt(total)} Treffer${total > MAX_SUGGESTIONS ? ` · erste ${MAX_SUGGESTIONS} angezeigt` : ""}`
-    : `${fmt(ITEMS.length)} Items`;
+  const list = $("list");
+  list.scrollTop = 0;
+  rendered = 0;
+  list.innerHTML = filtered.length ? "" : `<li class="empty">Kein handelbares Item gefunden.</li>`;
+  renderMore();
+  $("count").textContent = q ? `${fmt(filtered.length)} Treffer` : `${fmt(ITEMS.length)} Items`;
 }
+
+// Liste stückweise rendern: komplette Liste scrollbar, aber nur sichtbare Bereiche im DOM
+function renderMore(upTo = 0) {
+  const list = $("list");
+  do {
+    if (rendered >= filtered.length) return;
+    const end = Math.min(filtered.length, Math.max(rendered + CHUNK, upTo + 1));
+    let html = "";
+    for (let i = rendered; i < end; i++)
+      html += `<li role="option" data-i="${i}" aria-selected="${i === selIdx}">${esc(filtered[i].name)}</li>`;
+    list.insertAdjacentHTML("beforeend", html);
+    rendered = end;
+  } while (list.scrollHeight <= list.clientHeight + 200);   // Liste mindestens einmal überfüllen
+}
+$("list").addEventListener("scroll", () => {
+  const l = $("list");
+  if (l.scrollTop + l.clientHeight > l.scrollHeight - 400) renderMore();
+}, { passive: true });
 
 function highlight(i, scroll = true) {
   const list = $("list");
+  if (i >= rendered) renderMore(i);
   list.querySelector('[aria-selected="true"]')?.setAttribute("aria-selected", "false");
   selIdx = i;
   const li = list.querySelector(`[data-i="${i}"]`);
