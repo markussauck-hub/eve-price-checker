@@ -18,7 +18,7 @@ Kleines Desktop-Tool (Python/Tkinter) für **EVE Online**: zeigt für ein Item d
 
 **https://markussauck-hub.github.io/eve-price-checker/**
 
-Gleiche Funktionen wie die Desktop-Version, im LincolnSoft-Look des Invention Helpers. Preise kommen live aus ESI direkt im Browser, nichts zu installieren. Zusätzlich: Baumaterialien des gewählten Items (Blueprint bzw. Reaktion aus dem SDE, Runs und ME einstellbar, Multibuy-Knopf), Accounting-Skill wählbar (wird im Browser gespeichert), Anzahl Orders und Spanne je Hub, Direktlink pro Item (z. B. `…/#34` für Tritanium).
+Gleiche Funktionen wie die Desktop-Version, im LincolnSoft-Look des Invention Helpers. Preise kommen live aus ESI direkt im Browser, nichts zu installieren. Zusätzlich: Baumaterialien des gewählten Items (Blueprint bzw. Reaktion aus dem SDE, Runs und ME einstellbar, Multibuy-Knopf), Accounting-Skill wählbar (wird im Browser gespeichert), optional leise Weltraum-Ambient-Musik und Computer-Soundeffekte (Schalter MUSIK/SOUNDS im Header, komplett per Web Audio erzeugt, keine Audiodateien), Anzahl Orders und Spanne je Hub, Direktlink pro Item (z. B. `…/#34` für Tritanium).
 
 | Datei | Zweck |
 |---|---|

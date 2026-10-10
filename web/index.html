@@ -371,6 +371,31 @@
 
   .loading .v { opacity: .45; }
 
+  /* Sound-Schalter im Header */
+  .audio { display: flex; gap: 6px; justify-content: flex-end; margin-top: 6px; }
+  .audio .linkbtn { padding: 4px 10px; font-size: 9px; border-radius: 8px; }
+  .audio .linkbtn .ico { display: inline-block; width: 12px; text-align: center; margin-right: 4px; }
+  .audio .linkbtn.on {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(160,225,255,.95) 0%, rgba(90,180,240,.9) 48%, rgba(30,110,200,.95) 50%, rgba(40,140,225,.95) 100%);
+    border-color: rgba(10,50,100,.9);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), inset 0 -3px 8px rgba(0,30,80,.45), inset 0 1px 0 rgba(255,255,255,.7), 0 0 14px rgba(127,207,255,.5);
+  }
+  .audio input[type=range] { width: 70px; accent-color: var(--accent); align-self: center; }
+  .audio .eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 10px; margin-right: 4px; vertical-align: -1px; }
+  .audio .eq i { width: 2px; background: currentColor; height: 3px; }
+  .audio .on .eq i { animation: eq 1.2s ease-in-out infinite; }
+  .audio .on .eq i:nth-child(2) { animation-delay: -.4s; } .audio .on .eq i:nth-child(3) { animation-delay: -.8s; }
+  @keyframes eq { 0%,100% { height: 3px; } 50% { height: 10px; } }
+  @media (prefers-reduced-motion: reduce) { .audio .on .eq i { animation: none; height: 7px; } }
+  @media (max-width: 980px) {
+    header .brand { min-width: 0; }
+    header img { height: 34px; }
+  }
+  @media (max-width: 520px) {
+    .audio input[type=range] { display: none; }
+  }
+
   .mats { margin-top: 10px; }
   .mats .bpline { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
   .mats .bpline b { color: var(--text); font-weight: 600; }
@@ -396,6 +421,11 @@
     <div class="brand">
       <h1>EVE PRICE CHECKER</h1>
       <div class="subtitle" id="hublist"></div>
+      <div class="audio">
+        <button class="linkbtn" id="snd-music" type="button" aria-pressed="false" title="Leise Weltraum-Ambient-Musik"><span class="eq"><i></i><i></i><i></i></span>MUSIK</button>
+        <button class="linkbtn" id="snd-fx" type="button" aria-pressed="false" title="Computer-Soundeffekte beim Rechnen"><span class="ico">◈</span>SOUNDS</button>
+        <input id="snd-vol" type="range" min="0" max="100" step="1" aria-label="Lautstärke" title="Lautstärke">
+      </div>
     </div>
   </header>
   <div class="rule"></div>
@@ -700,6 +730,7 @@ addEventListener("hashchange", openFromHash);
 
 $("list").addEventListener("click", (ev) => {
   const li = ev.target.closest("li[data-i]");
+  if (li) Sound.blip();
   if (li) select(Number(li.dataset.i), false);
 });
 
@@ -748,9 +779,10 @@ async function loadPrices() {
   renderMats();
   $("result").classList.add("loading");
   setStatus(`Lade Daten für ${item.name} …`, "busy");
+  Sound.computeStart();
 
   const res = await Promise.all(STATIONS.map((h) => fetchHub(h, item.id)));
-  if (token !== loadToken) return;     // inzwischen anderes Item gewählt
+  if (token !== loadToken) { Sound.computeStop(null); return; }   // inzwischen anderes Item gewählt
 
   results = res;
   $("result").classList.remove("loading");
@@ -761,6 +793,7 @@ async function loadPrices() {
   const time = new Date().toLocaleTimeString("de-DE");
   $("sub").textContent = `TypeID ${item.id} · Stand ${time}`;
   const errors = STATIONS.map((h, i) => res[i].error && `${h.name}: ${res[i].error}`).filter(Boolean);
+  Sound.computeStop(errors.length ? "err" : "ok");
   if (errors.length) setStatus(`Fehler – ${errors.join(" | ")}`, "err");
   else setStatus(`Bereit · ${item.name} · ${time}`);
 }
@@ -887,6 +920,7 @@ async function copyList(items, btn, label) {
     document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove();
   }
   setStatus(`Multibuy kopiert · ${label} · ${items.length} Positionen – im Markt unter Multibuy → Einfügen`);
+  Sound.copy();
   btn.textContent = "✔ KOPIERT";
   btn.classList.add("done");
   setTimeout(() => { btn.textContent = "MULTIBUY KOPIEREN"; btn.classList.remove("done"); }, 1500);
@@ -895,6 +929,182 @@ $("copy-mats").addEventListener("click", (ev) => {
   const runs = clampInt($("runs"), 1, 100000, 1);
   copyList(matList, ev.currentTarget, `Materialien für ${fmt(runs)} Run(s) ${current.name}`);
 });
+
+// ---------------------------------------------------------------- Sound (alles per Web Audio erzeugt, keine Dateien)
+const Sound = (() => {
+  let ctx = null, master, musicBus, fxBus, reverb, musicOn = false, fxOn = false;
+  let musicNodes = null, chordTimer = 0, pingTimer = 0, computeTimer = 0, computing = 0;
+  let vol = Math.min(100, Math.max(0, Number(store.get("snd.vol", 45))));
+  const want = { music: !!store.get("snd.music", false), fx: !!store.get("snd.fx", false) };
+
+  function ensure() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = (vol / 100) ** 2;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
+    master.connect(comp).connect(ctx.destination);
+    reverb = ctx.createConvolver(); reverb.buffer = impulse(4.5, 2.2);
+    const wet = ctx.createGain(); wet.gain.value = .55; reverb.connect(wet).connect(master);
+    musicBus = ctx.createGain(); musicBus.gain.value = 0; musicBus.connect(master); musicBus.connect(reverb);
+    fxBus = ctx.createGain(); fxBus.gain.value = .5; fxBus.connect(master);
+    const fxSend = ctx.createGain(); fxSend.gain.value = .25; fxBus.connect(fxSend).connect(reverb);
+    return true;
+  }
+
+  function impulse(seconds, decay) {
+    const len = Math.floor(ctx.sampleRate * seconds), buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** decay;
+    }
+    return buf;
+  }
+
+  // ---- Ambient: langsam wechselnde Flächen in D-Dorisch, Tiefpass mit LFO, vereinzelte Sternen-Pings
+  const CHORDS = [[50, 57, 62, 64, 69], [48, 55, 60, 64, 67], [46, 53, 58, 62, 65], [45, 52, 57, 60, 64]];
+  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+  let chordIdx = 0;
+
+  function startMusic() {
+    if (musicNodes) return;
+    const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 700; filter.Q.value = .7;
+    const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+    lfo.frequency.value = .045; lfoGain.gain.value = 380; lfo.connect(lfoGain).connect(filter.frequency); lfo.start();
+    filter.connect(musicBus);
+    // Grundton-Drohne
+    const drone = ctx.createOscillator(), dg = ctx.createGain();
+    drone.type = "sine"; drone.frequency.value = hz(38); dg.gain.value = .18; drone.connect(dg).connect(filter); drone.start();
+    // 5 Stimmen je 2 leicht verstimmte Oszillatoren
+    const voices = CHORDS[0].map((m) => {
+      const g = ctx.createGain(); g.gain.value = 0; g.connect(filter);
+      const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      const oscs = [-6, 6].map((cents, k) => {
+        const o = ctx.createOscillator(); o.type = k ? "triangle" : "sine";
+        o.frequency.value = hz(m); o.detune.value = cents;
+        if (pan) { pan.pan.value = Math.random() * 1.2 - .6; o.connect(pan).connect(g); } else o.connect(g);
+        o.start(); return o;
+      });
+      return { g, oscs };
+    });
+    musicNodes = { filter, lfo, drone, voices };
+    musicBus.gain.cancelScheduledValues(ctx.currentTime);
+    musicBus.gain.setValueAtTime(musicBus.gain.value, ctx.currentTime);
+    musicBus.gain.linearRampToValueAtTime(.32, ctx.currentTime + 6);
+    nextChord();
+    chordTimer = setInterval(nextChord, 14000);
+    schedulePing();
+  }
+
+  function nextChord() {
+    const t = ctx.currentTime, chord = CHORDS[chordIdx++ % CHORDS.length];
+    musicNodes.voices.forEach((v, i) => {
+      v.oscs.forEach((o) => o.frequency.setTargetAtTime(hz(chord[i]), t, 2.5));
+      v.g.gain.setTargetAtTime(.05 + Math.random() * .05, t, 3);
+    });
+  }
+
+  function schedulePing() {
+    pingTimer = setTimeout(() => {
+      if (!musicNodes) return;
+      const chord = CHORDS[(chordIdx + CHORDS.length - 1) % CHORDS.length];
+      tone(hz(chord[Math.floor(Math.random() * chord.length)] + 24), { type: "sine", gain: .05, attack: .02, release: 3.5, bus: musicBus });
+      schedulePing();
+    }, 5000 + Math.random() * 9000);
+  }
+
+  function stopMusic() {
+    if (!musicNodes) return;
+    clearInterval(chordTimer); clearTimeout(pingTimer);
+    const n = musicNodes; musicNodes = null;
+    const t = ctx.currentTime;
+    musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t);
+    musicBus.gain.linearRampToValueAtTime(0, t + 1.5);
+    setTimeout(() => { [n.lfo, n.drone, ...n.voices.flatMap((v) => v.oscs)].forEach((o) => o.stop()); n.filter.disconnect(); }, 1700);
+  }
+
+  // ---- Effekte
+  function tone(freq, { type = "sine", gain = .1, attack = .005, release = .12, at = 0, bus = fxBus, slide = 0 } = {}) {
+    const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(freq * slide, t + attack + release);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + attack);
+    g.gain.exponentialRampToValueAtTime(.0001, t + attack + release);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + attack + release + .05);
+  }
+
+  const fxReady = () => fxOn && ensure();
+
+  function computeStart() {
+    computing++;
+    if (!fxReady() || computeTimer) return;
+    // Rechner-Geplapper: kurze Blips aus einer Pentatonik, leicht gefiltert
+    const scale = [1046, 1174, 1396, 1568, 1760, 2093, 2349];
+    const step = () => {
+      if (!computing || !fxOn) { computeTimer = 0; return; }
+      const n = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < n; i++)
+        tone(scale[Math.floor(Math.random() * scale.length)] * (Math.random() < .2 ? .5 : 1),
+             { type: Math.random() < .5 ? "square" : "triangle", gain: .028, release: .04 + Math.random() * .04, at: i * .045 });
+      computeTimer = setTimeout(step, 70 + Math.random() * 90);
+    };
+    tone(220, { type: "sawtooth", gain: .03, attack: .02, release: .35, slide: 4 });   // Hochfahren
+    step();
+  }
+
+  function computeStop(result = "ok") {
+    computing = Math.max(0, computing - 1);
+    if (computing || !fxReady()) return;
+    clearTimeout(computeTimer); computeTimer = 0;
+    if (result === null) return;
+    if (result === "ok") { tone(1318, { gain: .07, release: .25 }); tone(1975, { gain: .06, release: .5, at: .09 }); }
+    else { tone(330, { type: "triangle", gain: .09, release: .3 }); tone(247, { type: "triangle", gain: .09, release: .45, at: .16 }); }
+  }
+
+  const blip = () => fxReady() && tone(1760, { type: "triangle", gain: .035, release: .05 });
+  const copy = () => { if (!fxReady()) return; [1568, 2093, 2637].forEach((f, i) => tone(f, { type: "square", gain: .03, release: .06, at: i * .06 })); };
+
+  // ---- Bedienung
+  function paint() {
+    for (const [id, on] of [["snd-music", musicOn], ["snd-fx", fxOn]]) {
+      $(id).classList.toggle("on", on); $(id).setAttribute("aria-pressed", String(on));
+    }
+  }
+  function setMusic(on) {
+    musicOn = on; store.set("snd.music", on); paint();
+    if (on) { if (ensure()) startMusic(); } else if (ctx) stopMusic();
+  }
+  function setFx(on) {
+    fxOn = on; store.set("snd.fx", on); paint();
+    if (on && ensure()) blip();
+  }
+
+  $("snd-music").addEventListener("click", () => setMusic(!musicOn));
+  $("snd-fx").addEventListener("click", () => setFx(!fxOn));
+  $("snd-vol").value = vol;
+  $("snd-vol").addEventListener("input", () => {
+    vol = Number($("snd-vol").value); store.set("snd.vol", vol);
+    if (ctx) master.gain.setTargetAtTime((vol / 100) ** 2, ctx.currentTime, .05);
+  });
+
+  // Gespeicherte Wahl: Browser erlauben Ton erst nach einer Interaktion -> beim ersten Klick/Tastendruck starten
+  fxOn = want.fx; musicOn = want.music; paint();
+  if (want.music || want.fx) {
+    const unlock = (ev) => {
+      if (ev.target.closest?.(".audio")) return;      // Klick auf die Schalter regelt das selbst
+      removeEventListener("pointerdown", unlock, true); removeEventListener("keydown", unlock, true);
+      if (ensure() && musicOn) startMusic();
+    };
+    addEventListener("pointerdown", unlock, true); addEventListener("keydown", unlock, true);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!ctx) return;
+    if (document.hidden && !musicOn) ctx.suspend(); else if (!document.hidden) ctx.resume();
+  });
+
+  return { computeStart, computeStop, blip, copy, state: () => ({ ctx: ctx?.state ?? "none", music: !!musicNodes, computing, fx: fxOn }) };
+})();
 
 init();
 </script>
