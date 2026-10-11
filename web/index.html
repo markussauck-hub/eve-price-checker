@@ -969,8 +969,11 @@ $("copy-mats").addEventListener("click", (ev) => {
 const Sound = (() => {
   let ctx = null, master, musicBus, fxBus, reverb, musicOn = false, fxOn = false;
   let musicNodes = null, chordTimer = 0, pingTimer = 0, computeTimer = 0, computing = 0;
-  let vol = Math.min(100, Math.max(0, Number(store.get("snd.vol", 45))));
-  const want = { music: !!store.get("snd.music", false), fx: !!store.get("snd.fx", false) };
+  // Einstellungen gelten für alle LincolnSoft-Tools auf dieser Domain (Price Checker, Invention Helper)
+  const sget = (k, f) => { try { const v = localStorage.getItem("lincolnsoft.snd." + k) ?? localStorage.getItem("epc.snd." + k); return v == null ? f : JSON.parse(v); } catch { return f; } };
+  const sset = (k, v) => { try { localStorage.setItem("lincolnsoft.snd." + k, JSON.stringify(v)); } catch { /* egal */ } };
+  let vol = Math.min(100, Math.max(0, Number(sget("vol", 45))));
+  const want = { music: !!sget("music", false), fx: !!sget("fx", false) };
 
   function ensure() {
     if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
@@ -1097,6 +1100,14 @@ const Sound = (() => {
     else { tone(330, { type: "triangle", gain: .09, release: .3 }); tone(247, { type: "triangle", gain: .09, release: .45, at: .16 }); }
   }
 
+  let burstTimer = 0;
+  function burst() {
+    if (!fxReady()) return;
+    if (!burstTimer) computeStart();
+    clearTimeout(burstTimer);
+    burstTimer = setTimeout(() => { burstTimer = 0; computeStop("ok"); }, 380 + Math.random() * 260);
+  }
+
   const blip = () => fxReady() && tone(1760, { type: "triangle", gain: .035, release: .05 });
   const copy = () => { if (!fxReady()) return; [1568, 2093, 2637].forEach((f, i) => tone(f, { type: "square", gain: .03, release: .06, at: i * .06 })); };
 
@@ -1107,11 +1118,11 @@ const Sound = (() => {
     }
   }
   function setMusic(on) {
-    musicOn = on; store.set("snd.music", on); paint();
+    musicOn = on; sset("music", on); paint();
     if (on) { if (ensure()) startMusic(); } else if (ctx) stopMusic();
   }
   function setFx(on) {
-    fxOn = on; store.set("snd.fx", on); paint();
+    fxOn = on; sset("fx", on); paint();
     if (on && ensure()) blip();
   }
 
@@ -1119,7 +1130,7 @@ const Sound = (() => {
   $("snd-fx").addEventListener("click", () => setFx(!fxOn));
   $("snd-vol").value = vol;
   $("snd-vol").addEventListener("input", () => {
-    vol = Number($("snd-vol").value); store.set("snd.vol", vol);
+    vol = Number($("snd-vol").value); sset("vol", vol);
     if (ctx) master.gain.setTargetAtTime((vol / 100) ** 2, ctx.currentTime, .05);
   });
 
@@ -1138,7 +1149,7 @@ const Sound = (() => {
     if (document.hidden && !musicOn) ctx.suspend(); else if (!document.hidden) ctx.resume();
   });
 
-  return { computeStart, computeStop, blip, copy, state: () => ({ ctx: ctx?.state ?? "none", music: !!musicNodes, computing, fx: fxOn }) };
+  return { computeStart, computeStop, burst, blip, copy, state: () => ({ ctx: ctx?.state ?? "none", music: !!musicNodes, computing, fx: fxOn }) };
 })();
 
 init();
