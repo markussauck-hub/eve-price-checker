@@ -358,6 +358,10 @@
   .head h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .hubs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .hub .row.avg { min-height: 22px; }
+  .hub .row.avg .k { font-size: 12px; }
+  .hub .row.avg .v { font-size: 13px; font-weight: 500; }
+  .hub .row.avg:nth-of-type(3) { border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; padding-top: 5px; }
   .hub .err { color: var(--neg); font-size: 12px; margin-top: 4px; }
   .spread { color: var(--muted); font: 600 12px var(--mono); }
 
@@ -509,7 +513,7 @@
   <footer>
     <span class="dot" id="dot">●</span>
     <span id="status">Lade Daten …</span>
-    <span class="credit">Preise live: <a href="https://esi.evetech.net/" target="_blank" rel="noopener">EVE ESI</a> · Nur Orders direkt an der Station · EVE Online © CCP hf.</span>
+    <span class="credit">Preise live: <a href="https://esi.evetech.net/" target="_blank" rel="noopener">EVE ESI</a> · Nur Orders direkt an der Station · Ø = nach Stückzahl gewichtet, ohne Fantasiepreise · EVE Online © CCP hf.</span>
   </footer>
 </div>
 
@@ -638,12 +642,21 @@ async function fetchOrders(region, typeId) {
 async function fetchHub(hub, typeId) {
   try {
     const orders = (await fetchOrders(hub.region, typeId)).filter((o) => o.location_id === hub.station);
-    const buys = orders.filter((o) => o.is_buy_order).map((o) => o.price);
-    const sells = orders.filter((o) => !o.is_buy_order).map((o) => o.price);
-    return { buy: buys.length ? Math.max(...buys) : null, sell: sells.length ? Math.min(...sells) : null,
+    const buyO = orders.filter((o) => o.is_buy_order), sellO = orders.filter((o) => !o.is_buy_order);
+    const buys = buyO.map((o) => o.price), sells = sellO.map((o) => o.price);
+    const buy = buys.length ? Math.max(...buys) : null, sell = sells.length ? Math.min(...sells) : null;
+    // Durchschnitt nach Stückzahl gewichtet (volume_remain); Fantasiepreise fliegen raus:
+    // Sells über dem 10-Fachen des niedrigsten Sells, Buys unter 1/10 des höchsten Buys
+    const wavg = (os) => {
+      const vol = os.reduce((a, o) => a + (o.volume_remain || 0), 0);
+      return vol ? os.reduce((a, o) => a + o.price * (o.volume_remain || 0), 0) / vol : null;
+    };
+    return { buy, sell,
+             avgBuy: wavg(buyO.filter((o) => o.price >= buy / 10)),
+             avgSell: wavg(sellO.filter((o) => o.price <= sell * 10)),
              nBuy: buys.length, nSell: sells.length, error: null };
   } catch (e) {
-    return { buy: null, sell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120) };
+    return { buy: null, sell: null, avgBuy: null, avgSell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120) };
   }
 }
 
@@ -839,6 +852,8 @@ function renderSkeleton() {
       <h3>${esc(h.name)}</h3>
       <div class="row"><span class="k">Höchstes Buy</span><span class="v">–</span></div>
       <div class="row"><span class="k">Niedrigstes Sell</span><span class="v">–</span></div>
+      <div class="row avg"><span class="k">Ø Buy</span><span class="v dim">–</span></div>
+      <div class="row avg"><span class="k">Ø Sell</span><span class="v dim">–</span></div>
     </div>`).join("");
 }
 
@@ -861,6 +876,8 @@ function renderHubs() {
         <span class="v${best(r.buy, bestBuy) ? " best" : ""}">${fmtIsk(r.buy)}</span></div>
       <div class="row"><span class="k">Niedrigstes Sell <span class="small">(${fmt(r.nSell)})</span></span>
         <span class="v${best(r.sell, bestSell) ? " best" : ""}">${fmtIsk(r.sell)}</span></div>
+      <div class="row avg" title="Durchschnitt der Buy-Orders an der Station, gewichtet nach Stückzahl (ohne Orders unter 1/10 des höchsten Buys)"><span class="k">Ø Buy</span><span class="v dim">${fmtIsk(r.avgBuy)}</span></div>
+      <div class="row avg" title="Durchschnitt der Sell-Orders an der Station, gewichtet nach Stückzahl (ohne Orders über dem 10-Fachen des niedrigsten Sells)"><span class="k">Ø Sell</span><span class="v dim">${fmtIsk(r.avgSell)}</span></div>
       ${spread}
       ${r.error ? `<div class="err">${esc(r.error)}</div>` : ""}
     </div>`;
