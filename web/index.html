@@ -1373,7 +1373,7 @@ const EveSSO = (() => {
     if (!el) return;
     if (!auth) {
       el.innerHTML = `${error ? `<span class="sso-err">${error.replace(/</g, "&lt;")}</span>` : ""}
-        ${infoHtml("ⓘ SICHER?")}
+        ${infoHtml("ⓘ IST DIE ANMELDUNG SICHER?")}
         <button class="linkbtn" id="sso-login" type="button" title="Optional: Skills deines Charakters automatisch übernehmen (nur Lesezugriff auf Skills)">${busy ? "ANMELDUNG …" : "MIT EVE ANMELDEN"}</button>`;
       el.querySelector("#sso-login").onclick = () => login();
       wireInfo(el);
