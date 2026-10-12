@@ -61,6 +61,20 @@ jobs:
         run: |
           pip install playwright
           python -m playwright install --with-deps chromium
+      - name: EVE-SSO erreichbar aus dem Browser (CORS)
+        shell: bash
+        run: |
+          set +e
+          ORIGIN="https://markussauck-hub.github.io"
+          tok=$(curl -s -D - -o /dev/null -X POST https://login.eveonline.com/v2/oauth/token \
+                -H "Origin: $ORIGIN" -H "Content-Type: application/x-www-form-urlencoded" \
+                --data "grant_type=authorization_code&code=TEST&client_id=94d6ac30438c4a659e0a85f581990bdc&code_verifier=TEST" \
+                | tr -d '\r' | grep -iE '^(HTTP/|access-control-allow-origin)' | tr '\n' ' ')
+          esi=$(curl -s -D - -o /dev/null -X OPTIONS "https://esi.evetech.net/latest/characters/2112625428/skills/" \
+                -H "Origin: $ORIGIN" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization" \
+                | tr -d '\r' | grep -iE '^(HTTP/|access-control-allow-(origin|headers))' | tr '\n' ' ')
+          echo "::notice title=SSO-CORS::Token: $tok %0AESI-Preflight: $esi"
+
       - name: Live-Seite prüfen
         run: |
           sleep 20
