@@ -629,7 +629,11 @@ const STATIONS = [
   { name: "Dodixie IX", station: 60011866, region: 10000032 },
   { name: "Rens VI",    station: 60004588, region: 10000030 },
 ];
-const TOOL_URL = "https://markussauck-hub.github.io/eve-invention-helper/";
+// Auf dem Lincolnsoft Server (lincolnsoft.de) bleiben Links und EVE-Login auf dem Server,
+// sonst (GitHub Pages) wie bisher auf github.io.
+const ON_LINCOLNSOFT = /(^|\.)lincolnsoft\.de$/.test(location.hostname);
+const TOOL_URL = ON_LINCOLNSOFT ? "/invention-helper/" : "https://markussauck-hub.github.io/eve-invention-helper/";
+document.getElementById("to-tool")?.setAttribute("href", TOOL_URL);
 const BASE_TAX = 0.075;          // Sales Tax ohne Skill
 const ROUTES_SHOWN = 3;
 const CHUNK = 250;               // Listeneinträge, die pro Schritt gerendert werden (Rest beim Scrollen)
@@ -1276,8 +1280,15 @@ const Sound = (() => {
 // OAuth2 Authorization Code + PKCE, nur im Browser. Token + Skills bleiben in localStorage dieser Domain
 // und gelten für alle LincolnSoft-Tools (Price Checker, Invention Helper). Scope: nur Skills lesen.
 const EveSSO = (() => {
-  const CLIENT_ID = "94d6ac30438c4a659e0a85f581990bdc";
-  const CALLBACK = "https://markussauck-hub.github.io/eve-price-checker/";
+  // Beide Tools teilen sich EINEN Callback (Price Checker); der leitet nach dem Login zum Ausgangstool zurück.
+  // Für lincolnsoft.de muss "https://lincolnsoft.de/price-checker/" als Callback in der EVE-Developer-App
+  // eingetragen sein. Falls dafür eine eigene App nötig ist: deren Client-ID hier eintragen.
+  const CLIENT_ID_GITHUB = "94d6ac30438c4a659e0a85f581990bdc";
+  const CLIENT_ID_LINCOLNSOFT = "94d6ac30438c4a659e0a85f581990bdc";
+  const CLIENT_ID = ON_LINCOLNSOFT ? CLIENT_ID_LINCOLNSOFT : CLIENT_ID_GITHUB;
+  const CALLBACK = ON_LINCOLNSOFT
+    ? location.origin + "/price-checker/"
+    : "https://markussauck-hub.github.io/eve-price-checker/";
   const SCOPE = "esi-skills.read_skills.v1";
   const AUTH = "https://login.eveonline.com/v2/oauth/authorize/";
   const TOKEN = "https://login.eveonline.com/v2/oauth/token";
