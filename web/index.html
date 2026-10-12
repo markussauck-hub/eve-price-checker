@@ -454,6 +454,17 @@
   .mats table td.q { font: 700 14px var(--mono); }
   .mats table td .nm { font-weight: 400; }
   .mats .total td { border-top: 1px solid rgba(255,255,255,.08); padding-top: 6px; color: var(--muted); }
+  .mats-scroll { overflow-x: auto; }
+  .mats th.hub, .mats td.hub { padding-left: 16px; }
+  .mats th.hub:first-of-type, .mats td.hub.first { border-left: 1px solid var(--border); }
+  .mats td.hub { font: 600 13px var(--mono); color: var(--text); }
+  .mats td.hub.na { color: var(--muted); }
+  .mats td.hub.loading { color: var(--muted); opacity: .6; }
+  .mats td.hub.cheap { color: var(--accent); }
+  .mats tr.cost td { color: var(--text); }
+  .mats tr.cost td.hub { font: 700 14px var(--mono); }
+  .mats tr.cost td.hub.best { color: var(--accent); font-size: 15px; }
+  .mats tr.cost td .partial { color: var(--warn); font-size: 11px; margin-left: 2px; }
 
   @media (max-width: 980px) {
     .hubs { grid-template-columns: 1fr; }
@@ -614,12 +625,14 @@
             <input id="me" type="number" min="0" max="10" step="1" value="10">
             <span class="small grow" id="mats-out"></span>
           </div>
-          <table>
-            <thead><tr><th>Material</th><th>Pro Run</th><th>Gesamt</th></tr></thead>
-            <tbody id="mats"></tbody>
-          </table>
+          <div class="mats-scroll">
+            <table>
+              <thead id="mats-head"></thead>
+              <tbody id="mats"></tbody>
+            </table>
+          </div>
           <div class="foot">
-            <span class="small grow">ohne Struktur-/Rig-Boni · Mengen wie im Industry-Fenster gerundet</span>
+            <span class="small grow">ohne Struktur-/Rig-Boni · Mengen wie im Industry-Fenster gerundet · Kosten = Ø Sell je Hub (nach Stückzahl gewichtet, ohne Fantasiepreise)</span>
             <button class="btn-ghost" id="copy-mats" type="button" disabled>MULTIBUY KOPIEREN</button>
           </div>
         </div>
@@ -676,6 +689,9 @@ const store = {
 let ITEMS = [], BY_ID = new Map(), filtered = [], rendered = 0, selIdx = -1, current = null, generated = "";
 let results = null, loadToken = 0;
 let BUILD = null, matList = [];
+let matPrices = {}, matToken = 0;          // typeId -> [Hub-Ergebnis je Station] (Ø Sell der Baumaterialien)
+const priceCache = new Map();              // "station:typeId" -> { t, r } – 5 Minuten
+const PRICE_TTL = 5 * 60 * 1000;
 let acctChar = null;          // Name des Charakters, wenn Accounting aus dem EVE-Login stammt
 let accounting = Math.min(5, Math.max(0, Number(store.get("accounting", 5)) || 0));
 
@@ -800,7 +816,7 @@ async function init() {
   $("me").value = store.get("me", 10);
   fetch("build.json", { cache: "no-cache" })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-    .then((d) => { BUILD = d; if (current) renderMats(); })
+    .then((d) => { BUILD = d; if (current) { renderMats(); loadMatPrices(); } })
     .catch((e) => { BUILD = { failed: String(e.message || e) }; if (current) renderMats(); });
 
   setStatus("Lade Item-Liste …", "busy");
@@ -922,7 +938,7 @@ $("search").addEventListener("keydown", (ev) => {
   }
 });
 
-$("refresh").addEventListener("click", () => current && loadPrices());
+$("refresh").addEventListener("click", () => { if (!current) return; priceCache.clear(); loadPrices(); });
 $("acct").addEventListener("change", () => {
   accounting = Number($("acct").value);
   acctChar = null;
@@ -953,6 +969,7 @@ async function loadPrices() {
   setStatus(`Lade Daten für ${item.name} …`, "busy");
   Sound.computeStart();
 
+  loadMatPrices();                                                 // läuft parallel zu den Hub-Preisen
   const res = await Promise.all(STATIONS.map((h) => fetchHub(h, item.id)));
   if (token !== loadToken) { Sound.computeStop(null); return; }   // inzwischen anderes Item gewählt
 
@@ -1031,6 +1048,40 @@ function renderRoutes() {
 }
 
 // ---------------------------------------------------------------- Baumaterialien
+// Ø-Kosten der Materialien je Hub: ESI-Orders pro Material und Region, gecacht, max. 6 Anfragen gleichzeitig
+async function hubCached(hub, typeId) {
+  const key = `${hub.station}:${typeId}`, hit = priceCache.get(key);
+  if (hit && Date.now() - hit.t < PRICE_TTL && !hit.r.error) return hit.r;
+  const r = await fetchHub(hub, typeId);
+  priceCache.set(key, { t: Date.now(), r });
+  return r;
+}
+
+async function pool(tasks, limit) {
+  let i = 0;
+  const worker = async () => { while (i < tasks.length) { const t = tasks[i++]; await t(); } };
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+}
+
+async function loadMatPrices() {
+  const token = ++matToken, rec = BUILD && !BUILD.failed && current ? BUILD.r[current.id] : null;
+  matPrices = {};
+  if (!rec) return;
+  const ids = rec[3].map(([id]) => id);
+  ids.forEach((id) => { matPrices[id] = STATIONS.map(() => null); });
+  let pending = 0;
+  const tasks = [];
+  ids.forEach((id) => STATIONS.forEach((h, s) => tasks.push(async () => {
+    const r = await hubCached(h, id);
+    if (token !== matToken) return;                                // anderes Item gewählt
+    matPrices[id][s] = r;
+    if (++pending % 4 === 0) renderMats();                         // Zwischenstand zeigen
+  })));
+  renderMats();
+  await pool(tasks, 6);
+  if (token === matToken) renderMats();
+}
+
 const round2 = (x) => Math.round(x * 100) / 100;
 // Menge pro Job wie im Spiel: mindestens 1 je Run, ME wirkt auf die Gesamtmenge
 const withME = (runs, qty, me) => Math.max(runs, Math.ceil(round2(runs * qty * (1 - me / 100))));
@@ -1049,7 +1100,10 @@ function renderMats() {
   matList = [];
   btn.disabled = true;
   $("mats-out").textContent = "";
-  const empty = (msg) => { tbody.innerHTML = `<tr><td class="placeholder" colspan="3">${esc(msg)}</td></tr>`; };
+  const ncol = 3 + STATIONS.length;
+  $("mats-head").innerHTML = `<tr><th>Material</th><th>Pro Run</th><th>Gesamt</th>${STATIONS.map((h, s) =>
+    `<th class="hub" title="Ø Sell pro Stück an ${esc(h.name)}">Ø ${esc(short(h.name))}</th>`).join("")}</tr>`;
+  const empty = (msg) => { tbody.innerHTML = `<tr><td class="placeholder" colspan="${ncol}">${esc(msg)}</td></tr>`; };
 
   if (!current) return empty("–");
   if (!BUILD) { $("bpline").textContent = "Lade Bau-Rezepte …"; return empty("…"); }
@@ -1074,10 +1128,50 @@ function renderMats() {
 
   matList = mats.map(([id, q]) => [bname(id), withME(runs, q, me)]);
   const totalUnits = matList.reduce((a, [, q]) => a + q, 0);
+
+  // Ø Sell pro Stück je Hub; günstigster Hub pro Material wird hervorgehoben
+  const unit = (id, s) => matPrices[id]?.[s];                      // undefined = nicht geladen, null = lädt
+  const price = (id, s) => unit(id, s)?.avgSell ?? null;
+  const isk = (n) => n == null ? "–" : Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const hubCells = (id) => {
+    const ps = STATIONS.map((_, s) => price(id, s)), min = Math.min(...ps.filter((v) => v != null));
+    return STATIONS.map((h, s) => {
+      const r = unit(id, s), first = s === 0 ? " first" : "";
+      if (r === null || r === undefined) return `<td class="hub loading${first}">…</td>`;
+      if (ps[s] == null) return `<td class="hub na${first}" title="Keine Sell-Orders an ${esc(h.name)}">–</td>`;
+      const cheap = ps[s] === min && STATIONS.length > 1 ? " cheap" : "";
+      return `<td class="hub${cheap}${first}" title="${esc(h.name)}: Ø Sell ${isk(ps[s])} ISK · niedrigstes Sell ${isk(r.sell)} ISK">${isk(ps[s])}</td>`;
+    }).join("");
+  };
+
+  // Summen je Hub: Gesamtmenge × Ø Sell; fehlt ein Preis, ist die Summe unvollständig (≥)
+  const sums = STATIONS.map((_, s) => {
+    let sum = 0, missing = 0, loading = 0;
+    mats.forEach(([id], i) => {
+      const r = unit(id, s);
+      if (r == null) loading++;
+      else if (r.avgSell == null) missing++;
+      else sum += r.avgSell * matList[i][1];
+    });
+    return { sum, missing, loading };
+  });
+  const complete = sums.filter((x) => !x.missing && !x.loading).map((x) => x.sum);
+  const bestSum = complete.length ? Math.min(...complete) : null;
+  const sumCell = (x, div, s) => {
+    const first = s === 0 ? " first" : "";
+    if (x.loading) return `<td class="hub loading${first}">…</td>`;
+    const best = !x.missing && x.sum === bestSum && STATIONS.length > 1 ? " best" : "";
+    const partial = x.missing ? `<span class="partial" title="${x.missing} Material(ien) ohne Sell-Orders – Summe unvollständig">≥</span>` : "";
+    return `<td class="hub${best}${first}">${partial}${isk(x.sum / div)}</td>`;
+  };
+  const produced = runs * outQty;
+
   tbody.innerHTML = mats.map(([id, q], i) => `
     <tr><td><span class="nm">${esc(bname(id))}</span>${tagHtml(id)}</td>
-        <td class="q dim">${fmt(q)}</td><td class="q">${fmt(matList[i][1])}</td></tr>`).join("")
-    + `<tr class="total"><td>${fmt(mats.length)} Materialien</td><td></td><td class="q">${fmt(totalUnits)}</td></tr>`;
+        <td class="q dim">${fmt(q)}</td><td class="q">${fmt(matList[i][1])}</td>${hubCells(id)}</tr>`).join("")
+    + `<tr class="total"><td>${fmt(mats.length)} Materialien</td><td></td><td class="q">${fmt(totalUnits)}</td>${STATIONS.map((_, s) => `<td class="hub${s === 0 ? " first" : ""}"></td>`).join("")}</tr>`
+    + `<tr class="cost"><td>Materialkosten gesamt <span class="small">(ISK)</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, 1, s)).join("")}</tr>`
+    + (produced > 1 ? `<tr class="cost"><td>pro Stück <span class="small">(÷ ${fmt(produced)})</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, produced, s)).join("")}</tr>` : "");
   btn.disabled = false;
 }
 
