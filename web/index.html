@@ -375,6 +375,13 @@
 
   .loading .v { opacity: .45; }
 
+  /* EVE-Login im Header (optional) */
+  .sso { display: flex; gap: 6px; justify-content: flex-end; align-items: center; margin-top: 6px; font-size: 12px; min-height: 24px; }
+  .sso .linkbtn { padding: 4px 10px; font-size: 9px; border-radius: 8px; }
+  .sso-portrait { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(127,207,255,.45); box-shadow: 0 0 8px rgba(127,207,255,.25); }
+  .sso-name { font-weight: 600; color: var(--text); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sso-err { color: var(--warn); font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   /* Sound-Schalter im Header */
   .audio { display: flex; gap: 6px; justify-content: flex-end; margin-top: 6px; }
   .audio .linkbtn { padding: 4px 10px; font-size: 9px; border-radius: 8px; }
@@ -446,6 +453,7 @@
         <button class="linkbtn" id="snd-fx" type="button" aria-pressed="false" title="Computer-Soundeffekte beim Rechnen"><span class="ico">◈</span>SOUNDS</button>
         <input id="snd-vol" type="range" min="0" max="100" step="1" aria-label="Lautstärke" title="Lautstärke">
       </div>
+      <div class="sso" id="sso"></div>
     </div>
   </header>
   <div class="rule"></div>
@@ -554,6 +562,7 @@ const store = {
 let ITEMS = [], BY_ID = new Map(), filtered = [], rendered = 0, selIdx = -1, current = null, generated = "";
 let results = null, loadToken = 0;
 let BUILD = null, matList = [];
+let acctChar = null;          // Name des Charakters, wenn Accounting aus dem EVE-Login stammt
 let accounting = Math.min(5, Math.max(0, Number(store.get("accounting", 5)) || 0));
 
 const salesTax = () => BASE_TAX * (1 - 0.11 * accounting);
@@ -802,6 +811,7 @@ $("search").addEventListener("keydown", (ev) => {
 $("refresh").addEventListener("click", () => current && loadPrices());
 $("acct").addEventListener("change", () => {
   accounting = Number($("acct").value);
+  acctChar = null;
   store.set("accounting", accounting);
   updateTaxInfo();
   if (results) renderRoutes();
@@ -809,7 +819,7 @@ $("acct").addEventListener("change", () => {
 
 function updateTaxInfo() {
   const pct = (salesTax() * 100).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
-  $("taxinfo").textContent = `Sales Tax ${pct} %`;
+  $("taxinfo").textContent = `Sales Tax ${pct} %` + (acctChar ? ` · Accounting aus ${acctChar}` : "");
 }
 
 // ---------------------------------------------------------------- Preise
@@ -1169,6 +1179,179 @@ const Sound = (() => {
   return { computeStart, computeStop, burst, blip, copy, state: () => ({ ctx: ctx?.state ?? "none", music: !!musicNodes, computing, fx: fxOn }) };
 })();
 
+// ---------------------------------------------------------------- EVE SSO (optional: Skills des eigenen Charakters)
+// OAuth2 Authorization Code + PKCE, nur im Browser. Token + Skills bleiben in localStorage dieser Domain
+// und gelten für alle LincolnSoft-Tools (Price Checker, Invention Helper). Scope: nur Skills lesen.
+const EveSSO = (() => {
+  const CLIENT_ID = "94d6ac30438c4a659e0a85f581990bdc";
+  const CALLBACK = "https://markussauck-hub.github.io/eve-price-checker/";
+  const SCOPE = "esi-skills.read_skills.v1";
+  const AUTH = "https://login.eveonline.com/v2/oauth/authorize/";
+  const TOKEN = "https://login.eveonline.com/v2/oauth/token";
+  const K = { auth: "lincolnsoft.sso", skills: "lincolnsoft.sso.skills", pending: "lincolnsoft.sso.pending" };
+  const SKILL_TTL = 10 * 60 * 1000;
+  const listeners = [];
+  let auth = null, skills = null, busy = false, error = "";
+
+  const load = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch { return null; } };
+  const save = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* egal */ } };
+  const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const rnd = (n = 32) => b64url(crypto.getRandomValues(new Uint8Array(n)));
+  const jwt = (t) => JSON.parse(decodeURIComponent(escape(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")))));
+
+  function emit(fresh = false) {
+    paint();
+    const s = state();
+    listeners.forEach((cb) => { try { cb({ ...s, fresh }); } catch (e) { console.error(e); } });
+  }
+  function state() {
+    return { char: auth ? { id: auth.id, name: auth.name } : null, skills: skills?.levels || null, busy, error };
+  }
+
+  async function tokenRequest(params) {
+    const res = await fetch(TOKEN, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: CLIENT_ID, ...params }),
+    });
+    if (!res.ok) throw new Error(`Login-Server HTTP ${res.status}`);
+    const t = await res.json(), p = jwt(t.access_token);
+    const id = Number(String(p.sub).split(":").pop());
+    auth = { access: t.access_token, refresh: t.refresh_token || auth?.refresh, exp: Date.now() + (t.expires_in - 60) * 1000, id, name: p.name };
+    save(K.auth, auth);
+  }
+
+  async function accessToken() {
+    if (!auth) throw new Error("nicht angemeldet");
+    if (Date.now() < auth.exp) return auth.access;
+    await tokenRequest({ grant_type: "refresh_token", refresh_token: auth.refresh });
+    return auth.access;
+  }
+
+  async function loadSkills(force = false) {
+    if (!auth) return;
+    if (!force && skills && skills.id === auth.id && Date.now() - skills.at < SKILL_TTL) return;
+    busy = true; error = ""; paint();
+    try {
+      const res = await fetch(`https://esi.evetech.net/latest/characters/${auth.id}/skills/?datasource=tranquility`,
+        { headers: { Authorization: `Bearer ${await accessToken()}` } });
+      if (res.status === 401 || res.status === 403) throw new Error("Zugriff abgelehnt – bitte neu anmelden");
+      if (!res.ok) throw new Error(`ESI HTTP ${res.status}`);
+      const data = await res.json();
+      // active_skill_level: berücksichtigt Alpha-Klon-Grenzen
+      skills = { id: auth.id, at: Date.now(), sp: data.total_sp,
+                 levels: Object.fromEntries(data.skills.map((s) => [s.skill_id, s.active_skill_level])) };
+      save(K.skills, skills);
+    } catch (e) {
+      error = String(e.message || e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function login() {
+    const verifier = rnd(32);
+    const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+    const st = rnd(16);
+    save(K.pending, { state: st, verifier, ret: location.href.split("?")[0] });
+    location.href = AUTH + "?" + new URLSearchParams({
+      response_type: "code", redirect_uri: CALLBACK, client_id: CLIENT_ID, scope: SCOPE,
+      code_challenge: challenge, code_challenge_method: "S256", state: st,
+    });
+  }
+
+  function logout() {
+    const rt = auth?.refresh;
+    auth = null; skills = null; error = "";
+    save(K.auth, null); save(K.skills, null);
+    if (rt) fetch("https://login.eveonline.com/v2/oauth/revoke", { method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token_type_hint: "refresh_token", token: rt, client_id: CLIENT_ID }) }).catch(() => {});
+    emit();
+  }
+
+  // Rückkehr vom Login-Server (?code=…&state=…)
+  async function handleCallback() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has("code") && !q.has("error")) return false;
+    const pending = load(K.pending); save(K.pending, null);
+    history.replaceState(null, "", location.pathname + location.hash);
+    if (q.has("error")) { error = "Anmeldung abgebrochen"; return true; }
+    if (!pending || pending.state !== q.get("state")) { error = "Anmeldung ungültig (state) – bitte erneut versuchen"; return true; }
+    busy = true; paint();
+    try {
+      await tokenRequest({ grant_type: "authorization_code", code: q.get("code"), code_verifier: pending.verifier });
+      skills = null; save(K.skills, null);
+      await loadSkills(true);
+      busy = false;
+      // Login kam aus einem anderen Tool -> dorthin zurück
+      const ret = new URL(pending.ret, location.href);
+      if (ret.pathname !== location.pathname) { save("lincolnsoft.sso.fresh", true); location.replace(ret.href); return true; }
+      if (ret.hash && ret.hash !== location.hash) {        // z. B. #34 – CCP leitet ohne Hash zurück
+        history.replaceState(null, "", location.pathname + ret.hash);
+        dispatchEvent(new HashChangeEvent("hashchange"));
+      }
+      return "fresh";
+    } catch (e) {
+      error = `Anmeldung fehlgeschlagen (${String(e.message || e)})`;
+      auth = null; save(K.auth, null);
+      return true;
+    } finally {
+      busy = false;
+    }
+  }
+
+  // ---- Anzeige im Header
+  function paint() {
+    const el = document.getElementById("sso");
+    if (!el) return;
+    if (!auth) {
+      el.innerHTML = `${error ? `<span class="sso-err">${error.replace(/</g, "&lt;")}</span>` : ""}
+        <button class="linkbtn" id="sso-login" type="button" title="Optional: Skills deines Charakters automatisch übernehmen (nur Lesezugriff auf Skills)">${busy ? "ANMELDUNG …" : "MIT EVE ANMELDEN"}</button>`;
+      el.querySelector("#sso-login").onclick = () => login();
+      return;
+    }
+    const age = skills?.at ? Math.round((Date.now() - skills.at) / 60000) : null;
+    el.innerHTML = `
+      <img class="sso-portrait" src="https://images.evetech.net/characters/${auth.id}/portrait?size=64" alt="">
+      <span class="sso-name" title="${busy ? "Lade Skills …" : skills ? `Skills geladen${age ? ` vor ${age} min` : ""}` : "Skills nicht geladen"}">${auth.name.replace(/</g, "&lt;")}</span>
+      ${error ? `<span class="sso-err" title="${error.replace(/"/g, "&quot;")}">!</span>` : ""}
+      <button class="linkbtn" id="sso-reload" type="button" title="Skills neu laden"${busy ? " disabled" : ""}>${busy ? "…" : "↻"}</button>
+      <button class="linkbtn" id="sso-logout" type="button" title="Abmelden – Token und Skills werden aus dem Browser gelöscht">ABMELDEN</button>`;
+    el.querySelector("#sso-reload").onclick = async () => { await loadSkills(true); emit(); };
+    el.querySelector("#sso-logout").onclick = () => logout();
+  }
+
+  // ---- Start
+  auth = load(K.auth); skills = load(K.skills);
+  if (skills && auth && skills.id !== auth.id) skills = null;
+  const ready = (async () => {
+    paint();
+    let fresh = false;
+    const cb = await handleCallback();
+    if (cb === true) { emit(); return; }          // Fehler oder Weiterleitung läuft
+    if (cb === "fresh") fresh = true;
+    if (load("lincolnsoft.sso.fresh")) { fresh = true; save("lincolnsoft.sso.fresh", null); }
+    if (auth) await loadSkills();
+    emit(fresh);
+  })();
+
+  return {
+    ready, login, logout, state,
+    onChange(cb) { listeners.push(cb); },
+    level(id) { return skills?.levels?.[id] ?? null; },
+  };
+})();
+
+// Skills aus dem EVE-Login übernehmen: Accounting (16622) -> Sales Tax
+EveSSO.onChange(({ char, skills }) => {
+  const lv = skills?.[16622];
+  if (char && lv != null) {
+    accounting = lv; $("acct").value = String(lv); store.set("accounting", lv); acctChar = char.name;
+  } else acctChar = null;
+  updateTaxInfo();
+  if (results) renderRoutes();
+});
 init();
 </script>
 </body>
