@@ -6,9 +6,6 @@
 <title>EVE Price Checker</title>
 <meta name="description" content="EVE Online: Buy- und Sell-Preise an Jita, Amarr, Dodixie und Rens plus die besten Arbitrage-Routen">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   /* LincolnSoft-Styleguide – übernommen vom EVE Invention Helper */
   :root {
@@ -27,8 +24,8 @@
     --neg: #FF4D6D;
     --warn: #FFB547;
     --pi: #B48CFF;
-    --ui: "Segoe UI", Inter, "Helvetica Neue", system-ui, sans-serif;
-    --mono: "Cascadia Mono", Consolas, "JetBrains Mono", ui-monospace, monospace;
+    --ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --mono: "Martian Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -480,6 +477,22 @@
   /* ================================================================
      TITEL (Variante B: Chrom mit Cyan-Glanz) + Header-Raster
      ================================================================ */
+  @font-face { font-family: "Chakra Petch"; font-weight: 400; font-display: swap;
+               src: url("fonts/chakra-petch-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: swap;
+               src: url("fonts/chakra-petch-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: swap;
+               src: url("fonts/chakra-petch-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: swap;
+               src: url("fonts/chakra-petch-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 400; font-display: swap;
+               src: url("fonts/martian-mono-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 500; font-display: swap;
+               src: url("fonts/martian-mono-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 600; font-display: swap;
+               src: url("fonts/martian-mono-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 700; font-display: swap;
+               src: url("fonts/martian-mono-latin-700-normal.woff2") format("woff2"); }
   @font-face { font-family: "Orbitron"; font-weight: 900; font-display: swap;
                src: url("fonts/orbitron-latin-900-normal.woff2") format("woff2"); }
   header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
