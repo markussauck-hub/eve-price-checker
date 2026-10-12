@@ -467,6 +467,8 @@
   .toolnav { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   .toolnav .btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; font-size: 11px; }
   .toolnav .btn-ghost .arrow { font-size: 14px; line-height: 1; }
+  .toolnav { display: flex; gap: 10px; white-space: nowrap; }
+  @media (max-width: 980px) { .toolnav { flex-direction: column; } }
   @media (max-width: 980px) {
     header { flex-wrap: wrap; }
     .toolnav { position: static; transform: none; order: 3; width: 100%; }
@@ -534,6 +536,7 @@
       <h1>EVE PRICE CHECKER</h1>
       <div class="subtitle" id="hublist"></div>
       <nav class="toolnav" aria-label="LincolnSoft-Tools">
+        <a class="btn-ghost" id="to-home" href="https://lincolnsoft.de/" title="Zurück zur Lincolnsoft Homestation"><span class="arrow">⌂</span>BACK TO HOMESTATION</a>
         <a class="btn-ghost" id="to-tool" href="https://markussauck-hub.github.io/eve-invention-helper/" title="Zum EVE Invention Helper wechseln – das aktuelle Item wird mitgenommen"><span class="arrow">⇄</span>EVE INVENTION HELPER</a>
       </nav>
     </div>
@@ -634,6 +637,7 @@ const STATIONS = [
 const ON_LINCOLNSOFT = /(^|\.)lincolnsoft\.de$/.test(location.hostname);
 const TOOL_URL = ON_LINCOLNSOFT ? "/invention-helper/" : "https://markussauck-hub.github.io/eve-invention-helper/";
 document.getElementById("to-tool")?.setAttribute("href", TOOL_URL);
+if (ON_LINCOLNSOFT) document.getElementById("to-home")?.setAttribute("href", "/");
 const BASE_TAX = 0.075;          // Sales Tax ohne Skill
 const ROUTES_SHOWN = 3;
 const CHUNK = 250;               // Listeneinträge, die pro Schritt gerendert werden (Rest beim Scrollen)
