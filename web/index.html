@@ -455,6 +455,21 @@
   .mats table td .nm { font-weight: 400; }
   .mats .total td { border-top: 1px solid rgba(255,255,255,.08); padding-top: 6px; color: var(--muted); }
   .mats-scroll { overflow-x: auto; }
+  .bob { margin-top: 10px; }
+  .bob .foot input[type=number] { width: 64px; }
+  .bob .foot #bpunits { width: 96px; }
+  .bob-verdict { display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 10px; border-radius: 10px;
+                 background: var(--surface-hi); border: 1px solid var(--border); font-size: 14px; }
+  .bob-verdict .badge { font: 700 12px var(--ui); letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+  .bob-verdict .badge.build { color: #04131a; background: var(--pos); }
+  .bob-verdict .badge.buy { color: #04131a; background: var(--accent); }
+  .bob-verdict b { color: var(--text); }
+  .bob td.hub { font: 600 13px var(--mono); padding-left: 16px; }
+  .bob th.hub { padding-left: 16px; }
+  .bob tr.lbl td:first-child { color: var(--muted); }
+  .bob tr.res td { border-top: 1px solid rgba(255,255,255,.08); padding-top: 6px; }
+  .bob tr.res td.hub { font: 700 14px var(--mono); }
+  .bob td.best { color: var(--accent); }
   .mats th.hub, .mats td.hub { padding-left: 16px; }
   .mats th.hub:first-of-type, .mats td.hub.first { border-left: 1px solid var(--border); }
   .mats td.hub { font: 600 13px var(--mono); color: var(--text); }
@@ -634,6 +649,25 @@
           <div class="foot">
             <span class="small grow">ohne Struktur-/Rig-Boni · Mengen wie im Industry-Fenster gerundet · Kosten = Ø Sell je Hub (nach Stückzahl gewichtet, ohne Fantasiepreise)</span>
             <button class="btn-ghost" id="copy-mats" type="button" disabled>MULTIBUY KOPIEREN</button>
+          </div>
+        </div>
+
+        <div class="card bob" id="bob-card" hidden>
+          <h3>Bauen oder kaufen?</h3>
+          <div class="bob-verdict" id="bob-verdict">–</div>
+          <div class="foot" style="margin:0 0 8px">
+            <label class="k" for="jobpct" title="Installationskosten des Jobs in % der Materialkosten (System-Kostenindex + Facility-Steuer, grob)">Job-Kosten</label>
+            <input id="jobpct" type="number" min="0" max="50" step="0.5" value="4"><span class="small">%</span>
+            <label class="k" for="bpmode" style="margin-left:14px">Blueprint</label>
+            <select id="bpmode"><option value="have">schon vorhanden</option><option value="buy" selected>kaufen, umlegen auf</option></select>
+            <input id="bpunits" type="number" min="1" max="1000000" step="1" value="100"><span class="small">Stück</span>
+          </div>
+          <div class="small" id="bp-note" style="margin:-4px 0 8px"></div>
+          <div class="mats-scroll">
+            <table>
+              <thead id="bob-head"></thead>
+              <tbody id="bob"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -978,6 +1012,7 @@ async function loadPrices() {
   $("refresh").disabled = false;
   renderHubs();
   renderRoutes();
+  renderMats();
 
   const time = new Date().toLocaleTimeString("de-DE");
   $("sub").textContent = `TypeID ${item.id} · Stand ${time}`;
@@ -1069,8 +1104,15 @@ async function loadMatPrices() {
   if (!rec) return;
   const ids = rec[3].map(([id]) => id);
   ids.forEach((id) => { matPrices[id] = STATIONS.map(() => null); });
+  const bpKey = "bp:" + rec[0];
+  matPrices[bpKey] = STATIONS.map(() => null);
   let pending = 0;
   const tasks = [];
+  STATIONS.forEach((h, s) => tasks.push(async () => {
+    const r = await hubCached(h, rec[0]);
+    if (token !== matToken) return;
+    matPrices[bpKey][s] = r;
+  }));
   ids.forEach((id) => STATIONS.forEach((h, s) => tasks.push(async () => {
     const r = await hubCached(h, id);
     if (token !== matToken) return;                                // anderes Item gewählt
@@ -1098,6 +1140,7 @@ const clampInt = (el, lo, hi, fallback) => {
 function renderMats() {
   const tbody = $("mats"), btn = $("copy-mats");
   matList = [];
+  $("bob-card").hidden = true;                       // wird erst gezeigt, wenn Rezept + Preise da sind
   btn.disabled = true;
   $("mats-out").textContent = "";
   const ncol = 3 + STATIONS.length;
@@ -1173,8 +1216,62 @@ function renderMats() {
     + `<tr class="cost"><td>Materialkosten gesamt <span class="small">(ISK)</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, 1, s)).join("")}</tr>`
     + (produced > 1 ? `<tr class="cost"><td>pro Stück <span class="small">(÷ ${fmt(produced)})</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, produced, s)).join("")}</tr>` : "");
   btn.disabled = false;
+  renderBob(sums, produced, mats.length);
 }
 
+// ---------------------------------------------------------------- Bauen oder kaufen?
+function renderBob(sums, produced, nMats) {
+  const card = $("bob-card");
+  card.hidden = !results;
+  if (!results) return;
+  const isk = (n) => n == null ? "–" : Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const jobPct = Math.max(0, Number($("jobpct").value) || 0) / 100;
+  const tax = salesTax();
+  const rec = BUILD.r[current.id], bpId = rec[0], reaction = rec[1] === 11;
+  const bpMode = $("bpmode").value, bpUnits = Math.max(1, Math.round(Number($("bpunits").value) || 1));
+  $("bpunits").disabled = bpMode !== "buy";
+  const bpRes = matPrices["bp:" + bpId];                    // Hub-Ergebnisse des Blueprints (BPO-Marktpreis)
+  const bpPrice = (s) => bpRes?.[s]?.sell ?? null;
+  const tradeable = bpRes && bpRes.some((r) => r && r.sell != null);
+  $("bp-note").innerHTML = reaction ? "Reaktions-Formeln: einmalige Anschaffung, hier wie ein Blueprint behandelt."
+    : !bpRes ? "Lade Blueprint-Preise …"
+    : tradeable ? `${esc(bname(bpId))}: niedrigstes Sell je Hub, anteilig auf ${fmt(bpUnits)} Stück umgelegt.`
+    : `${esc(bname(bpId))} ist am Markt nicht erhältlich (z. B. T2 – nur als BPC per Invention). Kosten dafür im <a href="${TOOL_URL}#${current.id}">Invention Helper</a>.`;
+  const rows = STATIONS.map((h, s) => {
+    const x = sums[s], ok = !x.loading && !x.missing;
+    const mat = ok ? x.sum / produced : null;
+    const bp = bpMode === "have" ? 0 : (bpPrice(s) == null ? null : bpPrice(s) / bpUnits);
+    const build = mat == null ? null : mat * (1 + jobPct) + (bp ?? 0);
+    const buy = results[s].sell;                      // niedrigstes Sell = Kaufpreis
+    const sellTo = results[s].buy;                    // höchstes Buy = Sofortverkauf
+    return { h, mat, bp, build, buy, save: build != null && buy != null ? buy - build : null,
+             profit: build != null && sellTo != null ? sellTo * (1 - tax) - build : null };
+  });
+  $("bob-head").innerHTML = `<tr><th>pro Stück (ISK)</th>${STATIONS.map((h) => `<th class="hub">${esc(short(h.name))}</th>`).join("")}</tr>`;
+  const best = (key, hi) => { const v = rows.map((r) => r[key]).filter((n) => n != null); return v.length ? (hi ? Math.max(...v) : Math.min(...v)) : null; };
+  const bBuild = best("build"), bBuy = best("buy"), bSave = best("save", true), bProf = best("profit", true);
+  const cell = (v, b, signed) => `<td class="hub${v != null && v === b ? " best" : ""}${signed && v != null ? (v >= 0 ? " pos" : " neg") : ""}">${signed && v != null ? fmtSigned(v) : isk(v)}</td>`;
+  $("bob").innerHTML = [
+    `<tr class="lbl"><td>Materialien</td>${rows.map((r) => cell(r.mat)).join("")}</tr>`,
+    `<tr class="lbl"><td>+ Job-Kosten (${fmtSigned(jobPct * 100, 1).replace("+", "")} %)</td>${rows.map((r) => cell(r.mat == null ? null : r.mat * jobPct)).join("")}</tr>`,
+    `<tr class="lbl"><td>+ Blueprint ${bpMode === "have" ? '<span class="small">(vorhanden)</span>' : `<span class="small">(÷ ${fmt(bpUnits)})</span>`}</td>${rows.map((r) => cell(r.bp)).join("")}</tr>`,
+    `<tr><td><b>Baukosten</b></td>${rows.map((r) => cell(r.build, bBuild)).join("")}</tr>`,
+    `<tr><td><b>Kaufen</b> <span class="small">(niedrigstes Sell)</span></td>${rows.map((r) => cell(r.buy, bBuy)).join("")}</tr>`,
+    `<tr class="res"><td>Ersparnis durch Bauen</td>${rows.map((r) => cell(r.save, bSave, true)).join("")}</tr>`,
+    `<tr class="res"><td>Gewinn bei Verkauf <span class="small">(an Buy-Order, nach Tax)</span></td>${rows.map((r) => cell(r.profit, bProf, true)).join("")}</tr>`,
+  ].join("");
+
+  // Fazit: günstigste Bau-Option gegen günstigsten Kauf über alle Hubs
+  const b = rows.filter((r) => r.build != null).sort((p, q) => p.build - q.build)[0];
+  const k = rows.filter((r) => r.buy != null).sort((p, q) => p.buy - q.buy)[0];
+  if (!b || !k) { $("bob-verdict").innerHTML = `<span class="small">Warte auf Preise …</span>`; return; }
+  const diff = k.buy - b.build, pct = diff / k.buy * 100;
+  $("bob-verdict").innerHTML = diff > 0
+    ? `<span class="badge build">BAUEN</span><span>Bauen mit Materialien aus <b>${esc(short(b.h.name))}</b> kostet <b>${isk(b.build)} ISK</b> – <b class="pos">${fmtSigned(pct, 1).replace("+", "")} %</b> günstiger als Kaufen in ${esc(short(k.h.name))} (${isk(k.buy)} ISK).</span>`
+    : `<span class="badge buy">KAUFEN</span><span>Kaufen in <b>${esc(short(k.h.name))}</b> für <b>${isk(k.buy)} ISK</b> ist günstiger – Bauen kostet mindestens ${isk(b.build)} ISK (<b class="neg">${fmtSigned(-pct, 1).replace("+", "")} %</b> teurer).</span>`;
+}
+
+["jobpct", "bpunits", "bpmode"].forEach((id) => $(id).addEventListener("input", () => renderMats()));
 ["runs", "me"].forEach((id) => $(id).addEventListener("input", () => {
   store.set(id, Number($(id).value));
   renderMats();
