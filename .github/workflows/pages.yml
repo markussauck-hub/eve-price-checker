@@ -31,7 +31,7 @@ jobs:
         run: python web/build_data.py --out site/items.json --build-out site/build.json
 
       - name: Seite zusammenstellen
-        run: cp web/index.html site/
+        run: cp web/index.html site/ && cp -r web/fonts site/
 
       - uses: actions/upload-pages-artifact@v4
         with:
