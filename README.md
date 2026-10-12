@@ -98,3 +98,13 @@ Der Quellcode wurde aus der kompilierten `EVE_Price_Checker.exe` rekonstruiert, 
 ---
 
 LincolnSoft · Clan Software Solutions
+
+## Datenschutz & Sicherheit (EVE-Login)
+
+Der Login ist **freiwillig** – ohne ihn funktioniert alles, Skills werden dann von Hand eingetragen.
+
+- Anmeldung **direkt bei CCP** über das offizielle EVE SSO (`login.eveonline.com`). Das Passwort sieht diese Seite nie.
+- Berechtigung: **nur** `esi-skills.read_skills.v1` (Skills lesen). Kein Zugriff auf Wallet, Assets, Mails oder Standort.
+- **Kein Server, keine Datenbank:** statische Seite auf GitHub Pages, Login per OAuth2 + PKCE ohne Client-Secret. Token und Skills liegen nur im `localStorage` des eigenen Browsers (`lincolnsoft.sso*`) und werden an niemanden übertragen.
+- Der Browser spricht dafür nur mit `login.eveonline.com` und `esi.evetech.net` (plus Bilder von `images.evetech.net`, Schriften von Google Fonts) – nachprüfbar mit F12 → Netzwerk. Der Code steht offen in diesem Repo (Abschnitt „EVE SSO“ in der HTML-Datei).
+- **Widerruf:** „Abmelden“ löscht alles im Browser und widerruft das Token bei CCP; alternativ bei CCP unter [Third-Party Applications](https://community.eveonline.com/support/third-party-applications/).

@@ -380,6 +380,24 @@
   .sso .linkbtn { padding: 4px 10px; font-size: 9px; border-radius: 8px; }
   .sso-portrait { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(127,207,255,.45); box-shadow: 0 0 8px rgba(127,207,255,.25); }
   .sso-name { font-weight: 600; color: var(--text); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sso { position: relative; }
+  .sso-info { all: unset; cursor: pointer; font: 700 10px var(--ui); letter-spacing: .05em; color: var(--accent); padding: 3px 6px; border-radius: 6px; }
+  .sso-info:hover, .sso-info[aria-expanded="true"] { background: rgba(127,207,255,.12); }
+  .sso-info:focus-visible { outline: 2px solid var(--accent-hi); }
+  .sso-pop {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; width: min(400px, calc(100vw - 32px));
+    text-align: left; padding: 14px 16px 12px; border-radius: 14px; font-size: 12.5px; line-height: 1.45; color: var(--text);
+    background: linear-gradient(160deg, rgba(40,46,56,.96), rgba(16,19,24,.97));
+    border: 1px solid rgba(127,207,255,.35); box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 18px rgba(127,207,255,.15);
+  }
+  .sso-pop h4 { margin: 0 0 8px; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+  .sso-pop ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .sso-pop li { padding-left: 20px; position: relative; }
+  .sso-pop li::before { content: "✔"; position: absolute; left: 0; color: var(--pos); text-shadow: 0 0 6px rgba(61,255,162,.4); }
+  .sso-pop b { color: #fff; }
+  .sso-pop code { font: 600 11px var(--mono); color: var(--accent-hi); }
+  .sso-pop a { color: var(--accent); }
+  .sso-pop .foot { margin-top: 10px; color: var(--muted); font-size: 11.5px; }
   .sso-err { color: var(--warn); font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* Sound-Schalter im Header */
@@ -1302,13 +1320,36 @@ const EveSSO = (() => {
   }
 
   // ---- Anzeige im Header
+  const INFO = `
+    <h4>Ist der Login sicher?</h4>
+    <ul>
+      <li>Du meldest dich <b>direkt bei CCP</b> an – auf <code>login.eveonline.com</code>. Dein Passwort sieht diese Seite nie. Prüf ruhig die Adresszeile.</li>
+      <li>Berechtigung: <b>nur Skills lesen</b> (<code>esi-skills.read_skills.v1</code>). Kein Zugriff auf Wallet, Assets, Mails oder Standort – CCP zeigt dir das vor der Bestätigung an.</li>
+      <li><b>Kein Server, keine Datenbank:</b> Die Seite ist eine statische Datei auf GitHub Pages. Token und Skills bleiben im <b>localStorage deines Browsers</b> und werden an niemanden übertragen – auch nicht an den Betreiber.</li>
+      <li>Für den Login spricht dein Browser nur mit <code>login.eveonline.com</code> und <code>esi.evetech.net</code> (dazu Bilder von <code>images.evetech.net</code>, Schriften von Google Fonts). Nachprüfbar mit F12 → Netzwerk.</li>
+      <li><b>Quellcode offen:</b> <a href="https://github.com/markussauck-hub/eve-price-checker/blob/main/web/index.html" target="_blank" rel="noopener">Price Checker</a> · <a href="https://github.com/markussauck-hub/eve-invention-helper/blob/main/index.html" target="_blank" rel="noopener">Invention Helper</a> – Abschnitt „EVE SSO“.</li>
+      <li><b>Jederzeit widerrufbar:</b> ABMELDEN löscht alles im Browser und widerruft das Token bei CCP. Oder direkt bei CCP unter <a href="https://community.eveonline.com/support/third-party-applications/" target="_blank" rel="noopener">Third-Party Applications</a>.</li>
+    </ul>
+    <div class="foot">Der Login ist freiwillig – ohne ihn funktioniert alles, Skills trägst du dann von Hand ein.</div>`;
+  let infoOpen = false;
+  const infoHtml = (label) => `<button class="sso-info" id="sso-info" type="button" aria-expanded="${infoOpen}" aria-controls="sso-pop">${label}</button>
+    <div class="sso-pop" id="sso-pop" role="dialog" aria-label="Sicherheit des EVE-Logins"${infoOpen ? "" : " hidden"}>${INFO}</div>`;
+  function wireInfo(el) {
+    el.querySelector("#sso-info").onclick = (ev) => { ev.stopPropagation(); infoOpen = !infoOpen; paint(); };
+    el.querySelector("#sso-pop").onclick = (ev) => ev.stopPropagation();
+  }
+  addEventListener("click", () => { if (infoOpen) { infoOpen = false; paint(); } });
+  addEventListener("keydown", (ev) => { if (ev.key === "Escape" && infoOpen) { infoOpen = false; paint(); } });
+
   function paint() {
     const el = document.getElementById("sso");
     if (!el) return;
     if (!auth) {
       el.innerHTML = `${error ? `<span class="sso-err">${error.replace(/</g, "&lt;")}</span>` : ""}
+        ${infoHtml("ⓘ SICHER?")}
         <button class="linkbtn" id="sso-login" type="button" title="Optional: Skills deines Charakters automatisch übernehmen (nur Lesezugriff auf Skills)">${busy ? "ANMELDUNG …" : "MIT EVE ANMELDEN"}</button>`;
       el.querySelector("#sso-login").onclick = () => login();
+      wireInfo(el);
       return;
     }
     const age = skills?.at ? Math.round((Date.now() - skills.at) / 60000) : null;
@@ -1317,9 +1358,11 @@ const EveSSO = (() => {
       <span class="sso-name" title="${busy ? "Lade Skills …" : skills ? `Skills geladen${age ? ` vor ${age} min` : ""}` : "Skills nicht geladen"}">${auth.name.replace(/</g, "&lt;")}</span>
       ${error ? `<span class="sso-err" title="${error.replace(/"/g, "&quot;")}">!</span>` : ""}
       <button class="linkbtn" id="sso-reload" type="button" title="Skills neu laden"${busy ? " disabled" : ""}>${busy ? "…" : "↻"}</button>
+      ${infoHtml("ⓘ")}
       <button class="linkbtn" id="sso-logout" type="button" title="Abmelden – Token und Skills werden aus dem Browser gelöscht">ABMELDEN</button>`;
     el.querySelector("#sso-reload").onclick = async () => { await loadSkills(true); emit(); };
     el.querySelector("#sso-logout").onclick = () => logout();
+    wireInfo(el);
   }
 
   // ---- Start
