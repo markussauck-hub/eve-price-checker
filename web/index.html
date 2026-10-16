@@ -360,6 +360,51 @@
   .hub .row.avg .v { font-size: 13px; font-weight: 500; }
   .hub .row.avg:nth-of-type(3) { border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; padding-top: 5px; }
   .hub .err { color: var(--neg); font-size: 12px; margin-top: 4px; }
+
+  /* ---------- Order-Popup ("View Market Details") ---------- */
+  .card.hub h3 { margin-bottom: 6px; }
+  .hub-name { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; color: var(--accent);
+              font: inherit; text-transform: uppercase; letter-spacing: .03em; border-radius: 6px; padding: 1px 4px; margin: -1px -4px; }
+  .hub-name:hover, .hub-name[aria-expanded="true"] { background: rgba(127,207,255,.12); }
+  .hub-name:focus-visible { outline: 2px solid var(--accent-hi); }
+  .mo-ico { font: 700 9px var(--ui); letter-spacing: .08em; color: var(--muted); border: 1px solid rgba(127,207,255,.35);
+            border-radius: 999px; padding: 1px 7px; }
+  .hub-name:hover .mo-ico, .hub-name[aria-expanded="true"] .mo-ico { color: var(--accent-hi); border-color: var(--accent); box-shadow: 0 0 8px rgba(127,207,255,.35); }
+
+  .mo-pop {
+    position: fixed; z-index: 40; width: min(620px, calc(100vw - 24px)); max-height: min(78vh, 640px);
+    display: flex; flex-direction: column; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(160deg, rgb(34,40,50), rgb(14,17,22));
+    border: 1px solid rgba(127,207,255,.35); box-shadow: 0 22px 50px rgba(0,0,0,.6), 0 0 22px rgba(127,207,255,.15);
+  }
+  .mo-pop[hidden] { display: none; }
+  .mo-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .mo-head h4 { margin: 0; font-size: 13px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; flex: 1; min-width: 0;
+                overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mo-head .small { white-space: nowrap; }
+  .mo-close { all: unset; cursor: pointer; color: var(--muted); font-size: 16px; padding: 2px 8px; border-radius: 6px; }
+  .mo-close:hover { color: #fff; background: rgba(255,255,255,.08); }
+  .mo-body { overflow-y: auto; padding: 4px 14px 12px; scrollbar-color: var(--surface-hi) transparent; }
+  .mo-sec { margin-top: 10px; }
+  .mo-sec h5 { margin: 0 0 4px; font: 700 11px var(--ui); letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 8px; align-items: baseline; }
+  .mo-sec.sell h5 { color: var(--neg); } .mo-sec.buy h5 { color: var(--pos); }
+  .mo-sec h5 .small { color: var(--muted); font-weight: 500; letter-spacing: 0; text-transform: none; }
+  .mo-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .mo-tbl th { position: sticky; top: 0; background: rgba(20,24,30,.98); color: var(--muted); font: 700 10px var(--ui); letter-spacing: .05em;
+               text-transform: uppercase; text-align: right; padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+  .mo-tbl td { text-align: right; padding: 3px 8px; font: 500 12.5px var(--mono); white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,.04); }
+  .mo-tbl tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .mo-tbl tr.top td { color: var(--accent); font-weight: 700; }
+  .mo-tbl td.l, .mo-tbl th.l { text-align: left; }
+  .mo-scroll { max-height: 240px; overflow-y: auto; border: 1px solid rgba(255,255,255,.06); border-radius: 9px; }
+  .mo-empty { color: var(--muted); padding: 8px 2px; font-size: 12px; }
+  @media (max-width: 640px) {
+    .mo-pop { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; width: auto; max-height: 82vh; }
+    .mo-scroll { max-height: 30vh; overflow: auto; }
+    .mo-tbl td { font-size: 10.5px; padding: 3px 4px; }
+    .mo-tbl th { font-size: 8.5px; padding: 4px 4px; letter-spacing: .02em; }
+    .mo-sec.buy .mo-tbl th:nth-child(4), .mo-sec.buy .mo-tbl td:nth-child(4) { display: none; }   /* Min. Menge */
+  }
   .spread { color: var(--muted); font: 600 12px var(--mono); }
 
   .routes { margin-top: 10px; }
@@ -681,6 +726,8 @@
   </footer>
 </div>
 
+<div class="mo-pop" id="mo-pop" role="dialog" aria-modal="false" aria-labelledby="mo-title" hidden></div>
+
 <script>
 "use strict";
 
@@ -827,9 +874,13 @@ async function fetchHub(hub, typeId) {
     return { buy, sell,
              avgBuy: wavg(buyO.filter((o) => o.price >= buy / 10)),
              avgSell: wavg(sellO.filter((o) => o.price <= sell * 10)),
-             nBuy: buys.length, nSell: sells.length, error: null };
+             nBuy: buys.length, nSell: sells.length, error: null,
+             // für das Order-Popup ("View Market Details"): Sells aufsteigend, Buys absteigend
+             sellOrders: sellO.slice().sort((a, b) => a.price - b.price),
+             buyOrders: buyO.slice().sort((a, b) => b.price - a.price) };
   } catch (e) {
-    return { buy: null, sell: null, avgBuy: null, avgSell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120) };
+    return { buy: null, sell: null, avgBuy: null, avgSell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120),
+             sellOrders: [], buyOrders: [] };
   }
 }
 
@@ -1011,6 +1062,7 @@ async function loadPrices() {
   $("result").classList.remove("loading");
   $("refresh").disabled = false;
   renderHubs();
+  if (MO.hub >= 0 && !$("mo-pop").hidden) moRender(MO.hub) || moClose(true);
   renderRoutes();
   renderMats();
 
@@ -1046,8 +1098,8 @@ function renderHubs() {
       ? `<div class="row"><span class="k">Spanne</span><span class="spread">${fmtSigned((r.sell - r.buy) / r.buy * 100, 1).replace("+", "")} %</span></div>`
       : "";
     return `
-    <div class="card hub">
-      <h3>${esc(h.name)}</h3>
+    <div class="card hub" data-hub="${i}">
+      <h3><button class="hub-name" type="button" data-hub="${i}" aria-haspopup="dialog" title="Alle Orders an ${esc(h.name)} anzeigen (wie „View Market Details“)">${esc(h.name)}<span class="mo-ico" aria-hidden="true">▤ ORDERS</span></button></h3>
       <div class="row"><span class="k">Höchstes Buy <span class="small">(${fmt(r.nBuy)})</span></span>
         <span class="v${best(r.buy, bestBuy) ? " best" : ""}">${fmtIsk(r.buy)}</span></div>
       <div class="row"><span class="k">Niedrigstes Sell <span class="small">(${fmt(r.nSell)})</span></span>
@@ -1081,6 +1133,110 @@ function renderRoutes() {
   }
   $("routes").innerHTML = rows.join("");
 }
+
+// ---------------------------------------------------------------- Order-Popup ("View Market Details")
+const MO = { hub: -1, pinned: false, openT: 0, closeT: 0 };
+const RANGE = { station: "Station", solarsystem: "System", region: "Region" };
+const fmtRange = (r) => RANGE[r] ?? (/^\d+$/.test(r) ? `${r} ${r === "1" ? "Sprung" : "Sprünge"}` : r);
+function fmtExpires(o) {
+  const ms = new Date(o.issued).getTime() + o.duration * 864e5 - Date.now();
+  if (!(ms > 0)) return "abgelaufen";
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+}
+const qty = (n) => Number(n).toLocaleString("de-DE");
+const price = (n) => Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function moTable(orders, buy) {
+  if (!orders.length) return `<div class="mo-empty">Keine ${buy ? "Buy" : "Sell"}-Orders an dieser Station.</div>`;
+  const head = buy
+    ? `<tr><th>Menge</th><th>Preis (ISK)</th><th class="l">Reichweite</th><th>Min. Menge</th><th>Läuft ab</th></tr>`
+    : `<tr><th>Menge</th><th>Preis (ISK)</th><th>Läuft ab</th></tr>`;
+  const rows = orders.map((o, i) => buy
+    ? `<tr${i ? "" : ' class="top"'}><td>${qty(o.volume_remain)}</td><td>${price(o.price)}</td><td class="l">${esc(fmtRange(String(o.range)))}</td><td>${qty(o.min_volume || 1)}</td><td>${fmtExpires(o)}</td></tr>`
+    : `<tr${i ? "" : ' class="top"'}><td>${qty(o.volume_remain)}</td><td>${price(o.price)}</td><td>${fmtExpires(o)}</td></tr>`).join("");
+  return `<div class="mo-scroll"><table class="mo-tbl"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function moRender(i) {
+  const h = STATIONS[i], r = results?.[i];
+  if (!r) return false;
+  const vol = (os) => qty(os.reduce((a, o) => a + (o.volume_remain || 0), 0));
+  $("mo-pop").innerHTML = `
+    <div class="mo-head">
+      <h4 id="mo-title">${esc(h.name)} · ${esc(current?.name || "")}</h4>
+      <span class="small">${esc($("sub").textContent.replace(/^TypeID \d+ · /, ""))}</span>
+      <button class="mo-close" type="button" aria-label="Schließen" title="Schließen (Esc)">✕</button>
+    </div>
+    <div class="mo-body">
+      ${r.error ? `<div class="err" style="margin-top:8px">${esc(r.error)}</div>` : ""}
+      <div class="mo-sec sell"><h5>Verkäufer (Sellers) <span class="small">${fmt(r.sellOrders.length)} Orders · ${vol(r.sellOrders)} Stück</span></h5>${moTable(r.sellOrders, false)}</div>
+      <div class="mo-sec buy"><h5>Käufer (Buyers) <span class="small">${fmt(r.buyOrders.length)} Orders · ${vol(r.buyOrders)} Stück</span></h5>${moTable(r.buyOrders, true)}</div>
+    </div>`;
+  $("mo-pop").querySelector(".mo-close").onclick = () => moClose(true);
+  return true;
+}
+
+function moPlace(i) {
+  const pop = $("mo-pop"), card = document.querySelector(`.card.hub[data-hub="${i}"]`);
+  if (!card || innerWidth <= 640) return;             // Handy: CSS legt es als Panel unten an
+  const c = card.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, gap = 10, m = 12;
+  let left = c.right + gap;                            // bevorzugt rechts neben der Karte
+  if (left + pw > innerWidth - m) left = c.left - gap - pw;   // sonst links
+  if (left < m) left = Math.min(Math.max(m, c.left), innerWidth - pw - m);  // sonst über/unter der Karte
+  let top = left >= c.right || left + pw <= c.left ? c.top : c.bottom + gap;
+  if (top + ph > innerHeight - m) top = Math.max(m, innerHeight - ph - m);
+  pop.style.left = `${Math.round(left)}px`; pop.style.top = `${Math.round(top)}px`;
+}
+
+function moOpen(i, pin) {
+  clearTimeout(MO.closeT);
+  if (MO.hub === i && !$("mo-pop").hidden) { if (pin) MO.pinned = true; return; }
+  if (!moRender(i)) return;
+  MO.hub = i; MO.pinned = !!pin;
+  document.querySelectorAll(".hub-name").forEach((b) => b.setAttribute("aria-expanded", String(Number(b.dataset.hub) === i)));
+  const pop = $("mo-pop"); pop.hidden = false; moPlace(i);
+  if (typeof Sound !== "undefined") Sound.blip();
+}
+function moClose(force) {
+  if (MO.pinned && !force) return;
+  clearTimeout(MO.openT); clearTimeout(MO.closeT);
+  $("mo-pop").hidden = true; MO.hub = -1; MO.pinned = false;
+  document.querySelectorAll(".hub-name").forEach((b) => b.setAttribute("aria-expanded", "false"));
+}
+
+// Hover (nur mit Maus) mit kurzer Verzögerung, Klick auf den Hub-Namen pinnt
+const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+$("hubs").addEventListener("mouseover", (ev) => {
+  if (!canHover || !results) return;
+  const card = ev.target.closest(".card.hub"); if (!card) return;
+  const i = Number(card.dataset.hub);
+  clearTimeout(MO.closeT); clearTimeout(MO.openT);
+  if (MO.pinned && MO.hub !== i) return;
+  MO.openT = setTimeout(() => moOpen(i, false), MO.hub >= 0 ? 80 : 350);
+});
+$("hubs").addEventListener("mouseout", (ev) => {
+  if (!canHover) return;
+  const to = ev.relatedTarget;
+  if (to && (to.closest?.(".card.hub") || to.closest?.("#mo-pop"))) return;
+  clearTimeout(MO.openT); MO.closeT = setTimeout(() => moClose(false), 220);
+});
+$("mo-pop").addEventListener("mouseenter", () => clearTimeout(MO.closeT));
+$("mo-pop").addEventListener("mouseleave", (ev) => {
+  if (ev.relatedTarget?.closest?.(".card.hub")) return;
+  MO.closeT = setTimeout(() => moClose(false), 220);
+});
+$("hubs").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".hub-name"); if (!b) return;
+  ev.stopPropagation();
+  const i = Number(b.dataset.hub);
+  if (MO.hub === i && MO.pinned) moClose(true); else { MO.hub = -1; moOpen(i, true); }
+});
+$("mo-pop").addEventListener("click", (ev) => ev.stopPropagation());
+addEventListener("click", () => { if (!$("mo-pop").hidden) moClose(true); });
+addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !$("mo-pop").hidden) moClose(true); });
+addEventListener("resize", () => { if (MO.hub >= 0) moPlace(MO.hub); });
+addEventListener("scroll", () => { if (MO.hub >= 0 && !MO.pinned) moClose(true); else if (MO.hub >= 0) moPlace(MO.hub); }, { passive: true });
 
 // ---------------------------------------------------------------- Baumaterialien
 // Ø-Kosten der Materialien je Hub: ESI-Orders pro Material und Region, gecacht, max. 6 Anfragen gleichzeitig
