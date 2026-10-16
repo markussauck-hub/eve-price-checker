@@ -1,0 +1,1851 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVE Price Checker</title>
+<meta name="description" content="EVE Online: Buy- und Sell-Preise an Jita, Amarr, Dodixie und Rens plus die besten Arbitrage-Routen">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<style>
+  /* LincolnSoft-Styleguide – übernommen vom EVE Invention Helper */
+  :root {
+    --bg: #121417;
+    --surface: #1B1E22;
+    --glass: rgba(27, 30, 34, .80);
+    --surface-hi: #23272C;
+    --border: #2E333A;
+    --text: #E8EAED;
+    --muted: #8B929C;
+    --accent: #7FCFFF;
+    --accent-hi: #A6DEFF;
+    --accent-dim: #4259FF;
+    --on-accent: #0A0C0E;
+    --pos: #3DFFA2;
+    --neg: #FF4D6D;
+    --warn: #FFB547;
+    --pi: #B48CFF;
+    --ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --mono: "Martian Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 var(--ui); }
+  button, input, select { font: inherit; color: inherit; }
+
+  /* ---------- Weltraum-Hintergrund ---------- */
+  .nebula { position: fixed; inset: -10%; z-index: 0; pointer-events: none; filter: blur(40px); }
+  .nebula i { position: absolute; border-radius: 50%; display: block; }
+  .nebula .n1 { left: 4%;  top: -6%; width: 46vw; height: 42vh; background: radial-gradient(closest-side, rgba(34,58,150,.55), transparent); }
+  .nebula .n2 { left: 44%; top: -10%; width: 40vw; height: 34vh; background: radial-gradient(closest-side, rgba(70,160,225,.35), transparent); }
+  .nebula .n3 { left: 20%; top: 38%;  width: 70vw; height: 30vh; transform: rotate(-24deg); background: radial-gradient(closest-side, rgba(34,58,150,.45), transparent); }
+  .nebula .n4 { left: 58%; top: 52%;  width: 36vw; height: 36vh; background: radial-gradient(closest-side, rgba(88,62,170,.30), transparent); }
+  .nebula .n5 { left: -6%; top: 70%;  width: 44vw; height: 36vh; background: radial-gradient(closest-side, rgba(70,160,225,.22), transparent); }
+  #sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+  .app { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 18px 20px 12px; min-height: 100vh; display: flex; flex-direction: column; }
+
+  header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  header img { height: 52px; display: block; }
+  .brand { text-align: right; }
+  h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: .02em; }
+  .subtitle { color: var(--muted); font-size: 12px; }
+  .rule { height: 2px; background: var(--accent); margin: 10px 0 16px; box-shadow: 0 0 10px rgba(127,207,255,.55); }
+
+  main { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 16px; flex: 1; align-items: start; }
+
+  /* ---------- Karten (Glas) ---------- */
+  .card {
+    background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    padding: 10px 14px; min-width: 0;
+  }
+  .card h3 { margin: 0 0 6px; color: var(--accent); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  .hint { color: var(--muted); font-size: 12px; margin: 0 0 4px; }
+  .small { color: var(--muted); font-size: 11px; }
+
+  /* ---------- Blueprint-Liste ---------- */
+  .side { position: sticky; top: 12px; display: flex; flex-direction: column; height: calc(100vh - 150px); min-height: 420px; }
+  input[type=search], input[type=number], select {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 0;
+    padding: 8px 10px; outline: none; caret-color: var(--accent);
+  }
+  input:focus, select:focus { border-color: var(--accent); background: var(--surface-hi); }
+  #search { width: 100%; margin-bottom: 10px; }
+  #search::-webkit-search-cancel-button { filter: invert(.6); }
+  #list {
+    list-style: none; margin: 0; padding: 1px; border: 1px solid var(--border); background: rgba(18,20,23,.7);
+    overflow-y: auto; flex: 1; min-height: 160px; scrollbar-color: var(--surface-hi) transparent;
+  }
+  #list li { padding: 4px 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #list li .from { color: var(--muted); }
+  #list li:hover { background: var(--surface-hi); }
+  #list li[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+  #list li[aria-selected="true"] .from { color: var(--on-accent); opacity: .7; }
+  #list .empty { color: var(--muted); cursor: default; }
+  #list .empty:hover { background: none; }
+  .listfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: var(--muted); font-size: 12px; gap: 8px; }
+
+  /* ---------- Detail ---------- */
+  .detail { min-width: 0; }
+  .detail h2 { margin: 0; font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; align-items: start; }
+  .card.wide { grid-column: 1 / -1; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { color: var(--muted); font: 700 10px var(--ui); text-transform: uppercase; letter-spacing: .04em; text-align: right; padding: 0 0 4px 12px; white-space: nowrap; }
+  th:first-child { text-align: left; padding-left: 0; }
+  td { padding: 3px 0 3px 12px; text-align: right; white-space: nowrap; vertical-align: middle; }
+  td:first-child { text-align: left; padding-left: 0; white-space: normal; }
+  tr.sep td { border-top: 1px solid var(--border); padding-top: 6px; }
+
+  .row { display: flex; align-items: center; gap: 12px; padding: 2px 0; min-height: 28px; }
+  .row .k { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .k { color: var(--muted); }
+  .v { font: 700 15px var(--mono); text-align: right; white-space: nowrap; }
+  .v.name { font: 600 14px var(--ui); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .v.best { color: var(--accent); font-size: 19px; }
+  .v.big { color: var(--accent); font-size: 17px; }
+  .v.dim { color: var(--muted); }
+  .nm { font-weight: 600; color: var(--text); }
+  .pos { color: var(--pos); }
+  .neg { color: var(--neg); }
+  .req { color: var(--muted); font-size: 12px; }
+  .lvl { width: 54px; text-align: center; font: 700 14px var(--mono); padding: 4px 4px 4px 8px; background: var(--surface-hi); }
+  .state { font: 700 14px var(--mono); width: 46px; text-align: right; }
+  #decryptor { min-width: 0; flex: 0 1 230px; padding: 6px 8px; }
+  .divider { border-top: 1px solid var(--border); margin: 8px 0 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 28px; }
+  .placeholder { color: var(--muted); padding: 2px 0; }
+  .foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .foot .grow { flex: 1; }
+  .foot input[type=number] { width: 70px; padding: 4px 8px; font: 700 14px var(--mono); text-align: center; }
+
+  .tag { display: inline-block; margin-left: 6px; padding: 0 4px; font: 700 9px var(--ui); letter-spacing: .05em; vertical-align: 1px; border: 1px solid currentColor; }
+  .tag.S { color: var(--warn); }
+  .tag.P { color: var(--pi); }
+  .tag.K { color: var(--muted); }
+
+  input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; margin: 0; }
+
+
+  .empty-state { margin-top: 10px; padding: 40px 20px; text-align: center; color: var(--muted); }
+
+  /* ---------- Statuszeile ---------- */
+  footer { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 8px; display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; }
+  .dot { color: var(--muted); font-size: 13px; }
+  footer .credit { margin-left: auto; text-align: right; }
+  footer a { color: var(--muted); }
+
+  /* ================================================================
+     GLAS-SCHICHT – überschreibt die Grundstile oben
+     ================================================================ */
+  :root {
+    --glass-bg: linear-gradient(160deg, rgba(40, 46, 56, .58) 0%, rgba(20, 23, 29, .62) 55%, rgba(16, 19, 24, .70) 100%);
+    --glass-edge: rgba(255, 255, 255, .09);
+    --glass-hi: rgba(255, 255, 255, .10);
+    --glow: rgba(127, 207, 255, .45);
+  }
+
+  /* Nebel etwas kräftiger, weil die Karten jetzt durchscheinen */
+  .nebula .n1 { background: radial-gradient(closest-side, rgba(34,58,150,.70), transparent); }
+  .nebula .n2 { background: radial-gradient(closest-side, rgba(70,160,225,.45), transparent); }
+  .nebula .n3 { background: radial-gradient(closest-side, rgba(34,58,150,.55), transparent); }
+  .nebula .n4 { background: radial-gradient(closest-side, rgba(88,62,170,.40), transparent); }
+
+  h1 { text-shadow: 0 0 18px rgba(127,207,255,.35); }
+  .rule { height: 1px; background: linear-gradient(90deg, transparent, var(--accent) 12%, var(--accent-hi) 50%, var(--accent) 88%, transparent);
+          box-shadow: 0 0 8px var(--glow), 0 0 24px rgba(127,207,255,.25); }
+
+  /* Karten: Milchglas mit Lichtkante oben und leuchtender Akzentleiste */
+  .card {
+    position: relative;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid var(--glass-edge); border-left: 0;
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 10px 30px rgba(0,0,0,.35);
+    padding-left: 17px;
+  }
+  .card::before {           /* Akzentleiste mit Glow */
+    content: ""; position: absolute; left: 0; top: -1px; bottom: -1px; width: 3px;
+    background: linear-gradient(180deg, var(--accent-hi), var(--accent) 40%, var(--accent-dim));
+    box-shadow: 0 0 10px var(--glow);
+  }
+  .card::after {            /* weicher Lichtschein oben links */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 60% at 0% 0%, rgba(127,207,255,.07), transparent 60%);
+  }
+  .card > * { position: relative; z-index: 1; }
+  .card h3 { text-shadow: 0 0 10px rgba(127,207,255,.35); }
+
+  /* Eingabefelder: dunkles Glas mit Fokus-Glow */
+  input[type=search], input[type=number], select {
+    background: rgba(8, 10, 14, .45);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.45);
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  input:focus, select:focus {
+    background: rgba(8, 10, 14, .6); border-color: rgba(127,207,255,.7);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.45), 0 0 0 3px rgba(127,207,255,.14), 0 0 14px rgba(127,207,255,.18);
+  }
+  select option { background: #1B1E22; color: var(--text); }
+  .lvl { background: rgba(8, 10, 14, .55); }
+
+  /* Blueprint-Liste */
+  #list { background: rgba(8, 10, 14, .40); border-color: rgba(255,255,255,.08); }
+  #list li { transition: background .12s; }
+  #list li:hover { background: rgba(127,207,255,.08); }
+  #list li[aria-selected="true"] {
+    background: linear-gradient(90deg, rgba(127,207,255,.95), rgba(127,207,255,.70));
+    box-shadow: 0 0 14px rgba(127,207,255,.35), inset 0 1px 0 rgba(255,255,255,.45);
+  }
+
+  /* Echte Glas-Buttons: abgerundet, spiegelnde obere Hälfte, Leuchten von unten */
+  .btn-ghost, .linkbtn {
+    position: relative; overflow: hidden; isolation: isolate;
+    border-radius: 12px;
+    padding: 8px 18px;
+    font: 700 11px var(--ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+    color: #fff; text-decoration: none; cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 20, 50, .65);
+    /* Glaskörper: hell oben, harte Spiegelkante in der Mitte, tiefes Blau unten */
+    background: linear-gradient(180deg,
+        rgba(160, 225, 255, .95) 0%,
+        rgba(90, 180, 240, .90) 48%,
+        rgba(30, 110, 200, .95) 50%,
+        rgba(40, 140, 225, .95) 100%);
+    border: 1px solid rgba(10, 50, 100, .9);
+    line-height: 1.2;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .12),        /* feiner Außenrand */
+      inset 0 -3px 8px rgba(0, 30, 80, .45),      /* Tiefe unten */
+      inset 0 1px 0 rgba(255, 255, 255, .7),      /* Lichtkante oben */
+      0 4px 14px rgba(40, 140, 230, .45),         /* blauer Schein */
+      0 2px 4px rgba(0, 0, 0, .45);
+    transition: filter .15s, box-shadow .15s, transform .08s;
+  }
+  .btn-ghost::before, .linkbtn::before {   /* Spiegelung: glänzende Kappe in der oberen Hälfte */
+    content: ""; position: absolute; z-index: -1; left: 3px; right: 3px; top: 2px; height: 46%;
+    border-radius: 10px 10px 40% 40% / 10px 10px 8px 8px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .85), rgba(255, 255, 255, .15));
+    pointer-events: none;
+  }
+  .btn-ghost::after, .linkbtn::after {     /* Lichtreflex von unten + Glanzstreifen beim Hover */
+    content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; pointer-events: none;
+    background:
+      radial-gradient(70% 45% at 50% 105%, rgba(170, 245, 255, .85), transparent 70%),
+      linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .45) 50%, transparent 65%) -150% 0 / 60% 100% no-repeat;
+    transition: background-position .55s ease;
+  }
+  .btn-ghost:hover, .linkbtn:hover {
+    filter: brightness(1.12) saturate(1.1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .2),
+      inset 0 -3px 8px rgba(0, 30, 80, .4),
+      inset 0 1px 0 rgba(255, 255, 255, .8),
+      0 0 22px rgba(127, 207, 255, .75),
+      0 2px 4px rgba(0, 0, 0, .45);
+  }
+  .btn-ghost:hover::after, .linkbtn:hover::after { background-position: 0 0, 250% 0; }
+  .btn-ghost:active, .linkbtn:active {
+    transform: translateY(1px); filter: brightness(.92);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .1), inset 0 2px 6px rgba(0, 20, 60, .6), 0 1px 3px rgba(0, 0, 0, .5);
+  }
+  .btn-ghost:focus-visible, .linkbtn:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 2px; }
+
+  /* Kopiert: grünes Glas */
+  .btn-ghost.done {
+    background: linear-gradient(180deg, rgba(170, 255, 210, .95) 0%, rgba(80, 220, 150, .9) 48%,
+                rgba(20, 150, 90, .95) 50%, rgba(40, 190, 120, .95) 100%);
+    border-color: rgba(5, 70, 40, .9);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 -3px 8px rgba(0, 60, 30, .45),
+                inset 0 1px 0 rgba(255,255,255,.7), 0 0 22px rgba(61, 255, 162, .55), 0 2px 4px rgba(0,0,0,.45);
+  }
+  .btn-ghost.done::after { background: radial-gradient(70% 45% at 50% 105%, rgba(190, 255, 220, .85), transparent 70%); }
+
+  /* Sekundär-Button (Skills zurücksetzen): Rauchglas */
+  .linkbtn {
+    padding: 6px 13px; border-radius: 10px; font-size: 10px; color: #e6edf5;
+    background: linear-gradient(180deg, rgba(120, 130, 145, .75) 0%, rgba(70, 78, 92, .8) 48%,
+                rgba(30, 34, 42, .9) 50%, rgba(45, 52, 62, .9) 100%);
+    border-color: rgba(0, 0, 0, .8);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08), inset 0 -3px 8px rgba(0,0,0,.4),
+                inset 0 1px 0 rgba(255,255,255,.45), 0 2px 6px rgba(0,0,0,.5);
+  }
+  .linkbtn::after { background: radial-gradient(70% 45% at 50% 105%, rgba(160, 200, 230, .35), transparent 70%),
+                    linear-gradient(105deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%) -150% 0 / 60% 100% no-repeat; }
+  .linkbtn:hover { box-shadow: 0 0 0 1px rgba(255,255,255,.15), inset 0 -3px 8px rgba(0,0,0,.35),
+                   inset 0 1px 0 rgba(255,255,255,.55), 0 0 14px rgba(127,207,255,.35), 0 2px 6px rgba(0,0,0,.5); }
+
+  /* Zahlen mit leichtem Leuchten */
+  .v.best { text-shadow: 0 0 14px rgba(127,207,255,.55); }
+  .v.big  { text-shadow: 0 0 10px rgba(127,207,255,.40); }
+  .pos { text-shadow: 0 0 8px rgba(61,255,162,.45); }
+  .neg { text-shadow: 0 0 8px rgba(255,77,109,.45); }
+
+  /* Tags als Glas-Chips */
+  .tag { border: 1px solid currentColor; padding: 1px 5px; box-shadow: 0 0 8px -2px currentColor; }
+  .tag.S { background: rgba(255,181,71,.12); }
+  .tag.P { background: rgba(180,140,255,.12); }
+  .tag.K { background: rgba(139,146,156,.10); box-shadow: none; }
+
+  /* Checkboxen im Glas-Stil */
+  input[type=checkbox] {
+    appearance: none; -webkit-appearance: none; display: inline-grid; place-content: center;
+    width: 16px; height: 16px; background: rgba(8,10,14,.5); border: 1px solid rgba(127,207,255,.45);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
+  }
+  input[type=checkbox]::before {
+    content: ""; width: 9px; height: 9px; transform: scale(0); transition: transform .12s;
+    background: var(--accent); box-shadow: 0 0 8px var(--glow);
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  }
+  input[type=checkbox]:checked { border-color: var(--accent); box-shadow: inset 0 1px 2px rgba(0,0,0,.5), 0 0 8px rgba(127,207,255,.35); }
+  input[type=checkbox]:checked::before { transform: scale(1); }
+
+  .divider, tr.sep td { border-color: rgba(255,255,255,.08); }
+  footer { border-top: 1px solid rgba(255,255,255,.08); }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .card { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+
+  /* Abgerundete Ecken (LincolnSoft-Styleguide, Web-Ergänzung) */
+  .card { border-radius: 14px; overflow: hidden; }
+  .card::before { top: 0; bottom: 0; border-radius: 14px 0 0 14px; }
+  .card::after { border-radius: inherit; }
+  input[type=search], input[type=number], select { border-radius: 9px; }
+  .lvl { border-radius: 8px; }
+  #list { border-radius: 10px; padding: 4px; }
+  #list li { border-radius: 7px; }
+  .tag { border-radius: 999px; padding: 1px 7px; }
+  input[type=checkbox] { border-radius: 5px; }
+
+  .btn-ghost:disabled, .linkbtn:disabled { opacity: .45; filter: none; box-shadow: none; cursor: default; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-ghost::after, .linkbtn::after { transition: none; }
+    .btn-ghost:hover::after, .linkbtn:hover::after { background-position: 0 0, -150% 0; }
+  }
+
+  @media (max-width: 980px) {
+    main { grid-template-columns: 1fr; }
+    .side { position: static; height: auto; min-height: 0; }
+    #list { height: 34vh; flex: none; }
+    .cards, .grid2, .grid3 { grid-template-columns: 1fr; }
+    header img { height: 40px; }
+    header .subtitle { display: none; }
+    h1 { font-size: 17px; }
+    footer { flex-wrap: wrap; }
+    footer .credit { margin-left: 0; width: 100%; text-align: left; }
+    .foot .small.grow { flex-basis: 100%; order: 3; }
+  }
+
+  /* ================================================================
+     PRICE CHECKER – Ergänzungen
+     ================================================================ */
+  #list li .tid { color: var(--muted); font: 500 11px var(--mono); margin-left: 8px; }
+  #list li[aria-selected="true"] .tid { color: var(--on-accent); opacity: .7; }
+
+  .head { display: flex; align-items: center; gap: 14px; }
+  .head img { width: 48px; height: 48px; border-radius: 10px; background: rgba(8,10,14,.5);
+              border: 1px solid rgba(255,255,255,.10); box-shadow: 0 0 14px rgba(127,207,255,.18); flex: none; }
+  .head img[hidden] { display: none; }
+  .head .grow { flex: 1; min-width: 0; }
+  .head h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .hubs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .hub .row.avg { min-height: 22px; }
+  .hub .row.avg .k { font-size: 12px; }
+  .hub .row.avg .v { font-size: 13px; font-weight: 500; }
+  .hub .row.avg:nth-of-type(3) { border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; padding-top: 5px; }
+  .hub .err { color: var(--neg); font-size: 12px; margin-top: 4px; }
+
+  /* ---------- Order-Popup ("View Market Details") ---------- */
+  .card.hub h3 { margin-bottom: 6px; }
+  .hub-name { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; color: var(--accent);
+              font: inherit; text-transform: uppercase; letter-spacing: .03em; border-radius: 6px; padding: 1px 4px; margin: -1px -4px; }
+  .hub-name:hover, .hub-name[aria-expanded="true"] { background: rgba(127,207,255,.12); }
+  .hub-name:focus-visible { outline: 2px solid var(--accent-hi); }
+  .mo-ico { font: 700 9px var(--ui); letter-spacing: .08em; color: var(--muted); border: 1px solid rgba(127,207,255,.35);
+            border-radius: 999px; padding: 1px 7px; }
+  .hub-name:hover .mo-ico, .hub-name[aria-expanded="true"] .mo-ico { color: var(--accent-hi); border-color: var(--accent); box-shadow: 0 0 8px rgba(127,207,255,.35); }
+
+  .mo-pop {
+    position: fixed; z-index: 40; width: min(620px, calc(100vw - 24px)); max-height: min(78vh, 640px);
+    display: flex; flex-direction: column; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(160deg, rgb(34,40,50), rgb(14,17,22));
+    border: 1px solid rgba(127,207,255,.35); box-shadow: 0 22px 50px rgba(0,0,0,.6), 0 0 22px rgba(127,207,255,.15);
+  }
+  .mo-pop[hidden] { display: none; }
+  .mo-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .mo-head h4 { margin: 0; font-size: 13px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; flex: 1; min-width: 0;
+                overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mo-head .small { white-space: nowrap; }
+  .mo-close { all: unset; cursor: pointer; color: var(--muted); font-size: 16px; padding: 2px 8px; border-radius: 6px; }
+  .mo-close:hover { color: #fff; background: rgba(255,255,255,.08); }
+  .mo-body { overflow-y: auto; padding: 4px 14px 12px; scrollbar-color: var(--surface-hi) transparent; }
+  .mo-sec { margin-top: 10px; }
+  .mo-sec h5 { margin: 0 0 4px; font: 700 11px var(--ui); letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 8px; align-items: baseline; }
+  .mo-sec.sell h5 { color: var(--neg); } .mo-sec.buy h5 { color: var(--pos); }
+  .mo-sec h5 .small { color: var(--muted); font-weight: 500; letter-spacing: 0; text-transform: none; }
+  .mo-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .mo-tbl th { position: sticky; top: 0; background: rgba(20,24,30,.98); color: var(--muted); font: 700 10px var(--ui); letter-spacing: .05em;
+               text-transform: uppercase; text-align: right; padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+  .mo-tbl td { text-align: right; padding: 3px 8px; font: 500 12.5px var(--mono); white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,.04); }
+  .mo-tbl tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .mo-tbl tr.top td { color: var(--accent); font-weight: 700; }
+  .mo-tbl td.l, .mo-tbl th.l { text-align: left; }
+  .mo-scroll { max-height: 240px; overflow-y: auto; border: 1px solid rgba(255,255,255,.06); border-radius: 9px; }
+  .mo-empty { color: var(--muted); padding: 8px 2px; font-size: 12px; }
+  @media (max-width: 640px) {
+    .mo-pop { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; width: auto; max-height: 82vh; }
+    .mo-scroll { max-height: 30vh; overflow: auto; }
+    .mo-tbl td { font-size: 10.5px; padding: 3px 4px; }
+    .mo-tbl th { font-size: 8.5px; padding: 4px 4px; letter-spacing: .02em; }
+    .mo-sec.buy .mo-tbl th:nth-child(4), .mo-sec.buy .mo-tbl td:nth-child(4) { display: none; }   /* Min. Menge */
+  }
+  .spread { color: var(--muted); font: 600 12px var(--mono); }
+
+  .routes { margin-top: 10px; }
+  .routes .row .k { color: var(--text); font-weight: 600; }
+  .routes .row .k .via { color: var(--muted); font-weight: 400; }
+  .routes .v.pos, .routes .v.neg { font-size: 16px; }
+  .routes .pct { font: 600 12px var(--mono); margin-left: 8px; opacity: .8; }
+  .routes .foot select { padding: 4px 8px; }
+  .routes .rank { display: inline-block; width: 18px; color: var(--muted); font: 700 12px var(--mono); }
+
+  .loading .v { opacity: .45; }
+
+  /* EVE-Login im Header (optional) */
+  .sso { display: flex; gap: 6px; justify-content: flex-end; align-items: center; margin-top: 6px; font-size: 12px; min-height: 24px; }
+  .sso .linkbtn { padding: 5px 11px; font-size: 10px; border-radius: 9px; }
+  .sso #sso-login {
+    padding: 9px 20px; font-size: 12px; border-radius: 12px; color: #fff;
+    background: linear-gradient(180deg, rgba(160,225,255,.95) 0%, rgba(90,180,240,.9) 48%, rgba(30,110,200,.95) 50%, rgba(40,140,225,.95) 100%);
+    border-color: rgba(10,50,100,.9);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), inset 0 -3px 8px rgba(0,30,80,.45), inset 0 1px 0 rgba(255,255,255,.7), 0 4px 14px rgba(40,140,230,.45), 0 0 18px rgba(127,207,255,.35);
+  }
+  .sso #sso-login::after { background: radial-gradient(70% 45% at 50% 105%, rgba(170,245,255,.85), transparent 70%),
+    linear-gradient(105deg, transparent 35%, rgba(255,255,255,.45) 50%, transparent 65%) -150% 0 / 60% 100% no-repeat; }
+  .sso .sso-info { font-size: 11px; padding: 5px 8px; white-space: nowrap; flex: none; }
+  .sso #sso-login { flex: none; white-space: nowrap; }
+  @media (max-width: 520px) {
+    .sso #sso-login { padding: 8px 13px; font-size: 11px; }
+    .sso .sso-info { padding: 5px 4px; }
+  }
+  .sso { margin-top: 8px; }
+  .sso-portrait { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(127,207,255,.45); box-shadow: 0 0 8px rgba(127,207,255,.25); }
+  .sso-name { font-weight: 600; color: var(--text); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sso { position: relative; }
+  .sso-info { all: unset; cursor: pointer; font: 700 10px var(--ui); letter-spacing: .05em; color: var(--accent); padding: 3px 6px; border-radius: 6px; }
+  .sso-info:hover, .sso-info[aria-expanded="true"] { background: rgba(127,207,255,.12); }
+  .sso-info:focus-visible { outline: 2px solid var(--accent-hi); }
+  .sso-pop {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; width: min(400px, calc(100vw - 32px));
+    text-align: left; padding: 14px 16px 12px; border-radius: 14px; font-size: 12.5px; line-height: 1.45; color: var(--text);
+    background: linear-gradient(160deg, rgba(40,46,56,.96), rgba(16,19,24,.97));
+    border: 1px solid rgba(127,207,255,.35); box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 18px rgba(127,207,255,.15);
+  }
+  .sso-pop h4 { margin: 0 0 8px; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+  .sso-pop ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .sso-pop li { padding-left: 20px; position: relative; }
+  .sso-pop li::before { content: "✔"; position: absolute; left: 0; color: var(--pos); text-shadow: 0 0 6px rgba(61,255,162,.4); }
+  .sso-pop b { color: #fff; }
+  .sso-pop code { font: 600 11px var(--mono); color: var(--accent-hi); }
+  .sso-pop a { color: var(--accent); }
+  .sso-pop .foot { margin-top: 10px; color: var(--muted); font-size: 11.5px; }
+  .sso-err { color: var(--warn); font-size: 11px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Sound-Schalter im Header */
+  .audio { display: flex; gap: 6px; justify-content: flex-end; margin-top: 6px; }
+  .audio .linkbtn { padding: 4px 10px; font-size: 9px; border-radius: 8px; }
+  .audio .linkbtn .ico { display: inline-block; width: 12px; text-align: center; margin-right: 4px; }
+  .audio .linkbtn.on {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(160,225,255,.95) 0%, rgba(90,180,240,.9) 48%, rgba(30,110,200,.95) 50%, rgba(40,140,225,.95) 100%);
+    border-color: rgba(10,50,100,.9);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), inset 0 -3px 8px rgba(0,30,80,.45), inset 0 1px 0 rgba(255,255,255,.7), 0 0 14px rgba(127,207,255,.5);
+  }
+  .audio .vol { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); cursor: pointer; padding-left: 4px; }
+  .audio .vol svg { width: 20px; height: 20px; filter: drop-shadow(0 0 4px rgba(127,207,255,.45)); }
+  .audio input[type=range] { -webkit-appearance: none; appearance: none; width: 130px; height: 22px; background: transparent; cursor: pointer; margin: 0; }
+  .audio input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); box-shadow: inset 0 1px 2px rgba(0,0,0,.5), 0 0 8px rgba(127,207,255,.3); }
+  .audio input[type=range]::-moz-range-track { height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); box-shadow: inset 0 1px 2px rgba(0,0,0,.5), 0 0 8px rgba(127,207,255,.3); }
+  .audio input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #a6deff 45%, #2c8ce1); border: 1px solid rgba(10,50,100,.9); box-shadow: 0 0 10px rgba(127,207,255,.7); }
+  .audio input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #a6deff 45%, #2c8ce1); border: 1px solid rgba(10,50,100,.9); box-shadow: 0 0 10px rgba(127,207,255,.7); }
+  .audio input[type=range]:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 2px; border-radius: 6px; }
+  .audio .eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 10px; margin-right: 4px; vertical-align: -1px; }
+  .audio .eq i { width: 2px; background: currentColor; height: 3px; }
+  .audio .on .eq i { animation: eq 1.2s ease-in-out infinite; }
+  .audio .on .eq i:nth-child(2) { animation-delay: -.4s; } .audio .on .eq i:nth-child(3) { animation-delay: -.8s; }
+  @keyframes eq { 0%,100% { height: 3px; } 50% { height: 10px; } }
+  @media (prefers-reduced-motion: reduce) { .audio .on .eq i { animation: none; height: 7px; } }
+  @media (max-width: 980px) {
+    header .brand { min-width: 0; }
+    header img { height: 34px; }
+  }
+  @media (max-width: 520px) {
+    .audio .vol { display: none; }
+  }
+
+  .mats { margin-top: 10px; }
+  .mats .bpline { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .mats .bpline b { color: var(--text); font-weight: 600; }
+  .mats .foot input[type=number] { width: 80px; }
+  .mats .foot input:disabled { opacity: .4; }
+  .mats table td.q { font: 700 14px var(--mono); }
+  .mats table td .nm { font-weight: 400; }
+  .mats .total td { border-top: 1px solid rgba(255,255,255,.08); padding-top: 6px; color: var(--muted); }
+  .mats-scroll { overflow-x: auto; }
+  .bob { margin-top: 10px; }
+  .bob .foot input[type=number] { width: 64px; }
+  .bob .foot #bpunits { width: 96px; }
+  .bob-verdict { display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 10px; border-radius: 10px;
+                 background: var(--surface-hi); border: 1px solid var(--border); font-size: 14px; }
+  .bob-verdict .badge { font: 700 12px var(--ui); letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+  .bob-verdict .badge.build { color: #04131a; background: var(--pos); }
+  .bob-verdict .badge.buy { color: #04131a; background: var(--accent); }
+  .bob-verdict b { color: var(--text); }
+  .bob td.hub { font: 600 13px var(--mono); padding-left: 16px; }
+  .bob th.hub { padding-left: 16px; }
+  .bob tr.lbl td:first-child { color: var(--muted); }
+  .bob tr.res td { border-top: 1px solid rgba(255,255,255,.08); padding-top: 6px; }
+  .bob tr.res td.hub { font: 700 14px var(--mono); }
+  .bob td.best { color: var(--accent); }
+  .mats th.hub, .mats td.hub { padding-left: 16px; }
+  .mats th.hub:first-of-type, .mats td.hub.first { border-left: 1px solid var(--border); }
+  .mats td.hub { font: 600 13px var(--mono); color: var(--text); }
+  .mats td.hub.na { color: var(--muted); }
+  .mats td.hub.loading { color: var(--muted); opacity: .6; }
+  .mats td.hub.cheap { color: var(--accent); }
+  .mats tr.cost td { color: var(--text); }
+  .mats tr.cost td.hub { font: 700 14px var(--mono); }
+  .mats tr.cost td.hub.best { color: var(--accent); font-size: 15px; }
+  .mats tr.cost td .partial { color: var(--warn); font-size: 11px; margin-left: 2px; }
+
+  @media (max-width: 980px) {
+    .hubs { grid-template-columns: 1fr; }
+    #list { height: 28vh; }
+  }
+  /* Tool-Wechsel oben mittig (LincolnSoft-Toolleiste) */
+  header { position: relative; }
+  .toolnav { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .toolnav .btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; font-size: 11px; }
+  .toolnav .btn-ghost .arrow { font-size: 14px; line-height: 1; }
+  .toolnav { display: flex; gap: 10px; white-space: nowrap; }
+  @media (max-width: 980px) { .toolnav { flex-direction: column; } }
+  @media (max-width: 980px) {
+    header { flex-wrap: wrap; }
+    .toolnav { position: static; transform: none; order: 3; width: 100%; }
+    .toolnav .btn-ghost { width: 100%; justify-content: center; }
+    header .brand { flex: 1; min-width: 0; }
+    header img { height: 32px; }
+  }
+  @media (max-width: 420px) { h1 { font-size: 15px; } }
+  /* ================================================================
+     TITEL (Variante B: Chrom mit Cyan-Glanz) + Header-Raster
+     ================================================================ */
+  @font-face { font-family: "Chakra Petch"; font-weight: 400; font-display: swap;
+               src: url("fonts/chakra-petch-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: swap;
+               src: url("fonts/chakra-petch-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: swap;
+               src: url("fonts/chakra-petch-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: swap;
+               src: url("fonts/chakra-petch-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 400; font-display: swap;
+               src: url("fonts/martian-mono-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 500; font-display: swap;
+               src: url("fonts/martian-mono-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 600; font-display: swap;
+               src: url("fonts/martian-mono-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Martian Mono"; font-weight: 700; font-display: swap;
+               src: url("fonts/martian-mono-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Orbitron"; font-weight: 900; font-display: swap;
+               src: url("fonts/orbitron-latin-900-normal.woff2") format("woff2"); }
+  header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+  header > img { justify-self: start; }
+  .hcenter { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; }
+  .hcenter h1 {
+    font: 900 36px/1.05 "Orbitron", "Segoe UI", Inter, sans-serif; letter-spacing: .08em;
+    background: linear-gradient(180deg, #ffffff 0%, #d9f1ff 20%, #7fa6c4 46%, #0e2a44 50%, #9fd8ff 54%, #e8f6ff 75%, #7fcfff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,.8)) drop-shadow(0 0 14px rgba(127,207,255,.45));
+  }
+  .hcenter .subtitle { margin-top: -2px; }
+  .hcenter .toolnav { position: static; transform: none; margin-top: 4px; }
+  .brand.hright { justify-self: end; }
+  .hcenter h1 { white-space: nowrap; }
+  @media (max-width: 1180px) {      /* zu schmal für drei Spalten: Titel in eigene Zeile */
+    header { grid-template-columns: auto 1fr; }
+    .hcenter { grid-column: 1 / -1; order: 3; margin-top: 4px; }
+    .hcenter h1 { font-size: 30px; }
+    header .subtitle { display: block; }
+  }
+  @media (max-width: 980px) {
+    .hcenter .toolnav { width: 100%; }
+    .hcenter h1 { font-size: 24px; }
+  }
+  @media (max-width: 420px) { .hcenter h1 { font-size: 20px; letter-spacing: .05em; } }
+
+  /* ================================================================
+     LESBARKEIT der Glas-Buttons: dunklere Kontur, weniger heller Glanz hinter der Schrift
+     ================================================================ */
+  .btn-ghost, .linkbtn, .sso #sso-login, .audio .linkbtn.on {
+    font-weight: 800;
+    text-shadow: 0 1px 1px rgba(0,18,48,1), 0 0 2px rgba(0,18,48,.95), 0 0 6px rgba(0,30,75,.7);
+  }
+  .btn-ghost, .sso #sso-login, .audio .linkbtn.on {
+    background: linear-gradient(180deg, rgba(82,158,222,.97) 0%, rgba(42,120,204,.96) 48%, rgba(12,66,148,.98) 50%, rgba(20,96,184,.98) 100%);
+  }
+  .btn-ghost::before, .linkbtn::before { background: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,.03)); height: 38%; }
+  .sso .sso-info { color: var(--accent-hi); }
+  @media (max-width: 520px) {
+    .sso { flex-wrap: wrap; row-gap: 4px; }
+    .sso .sso-info { white-space: normal; text-align: right; max-width: 150px; line-height: 1.25; }
+  }
+</style>
+</head>
+<body>
+<div class="nebula" aria-hidden="true"><i class="n1"></i><i class="n2"></i><i class="n3"></i><i class="n4"></i><i class="n5"></i></div>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div class="app">
+  <header>
+    <img src="data:image/png;base64,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" alt="LincolnSoft">
+    <div class="hcenter">
+      <h1>EVE PRICE CHECKER</h1>
+      <div class="subtitle" id="hublist"></div>
+      <nav class="toolnav" aria-label="LincolnSoft-Tools">
+        <a class="btn-ghost" id="to-home" href="https://lincolnsoft.de/" title="Zurück zur Lincolnsoft Homestation"><span class="arrow">⌂</span>BACK TO HOMESTATION</a>
+        <a class="btn-ghost" id="to-tool" href="https://markussauck-hub.github.io/eve-invention-helper/" title="Zum EVE Invention Helper wechseln – das aktuelle Item wird mitgenommen"><span class="arrow">⇄</span>EVE INVENTION HELPER</a>
+      </nav>
+    </div>
+    <div class="brand hright">
+      <div class="audio">
+        <button class="linkbtn" id="snd-music" type="button" aria-pressed="false" title="Leise Weltraum-Ambient-Musik"><span class="eq"><i></i><i></i><i></i></span>MUSIK</button>
+        <button class="linkbtn" id="snd-fx" type="button" aria-pressed="false" title="Computer-Soundeffekte beim Rechnen"><span class="ico">◈</span>SOUNDS</button>
+        <label class="vol" title="Lautstärke">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="snd-vol" type="range" min="0" max="100" step="1" aria-label="Lautstärke">
+        </label>
+      </div>
+      <div class="sso" id="sso"></div>
+    </div>
+  </header>
+  <div class="rule"></div>
+
+  <main>
+    <section class="card side">
+      <h3>Artikel</h3>
+      <label class="hint" for="search">Suchen – tippen, ↑ / ↓ blättern, Enter wählt</label>
+      <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="z. B. tritanium, plex, hammerhead …" disabled>
+      <ul id="list" role="listbox" aria-label="Handelbare Items"></ul>
+      <div class="listfoot">
+        <span id="count">–</span>
+      </div>
+    </section>
+
+    <section class="detail">
+      <div class="head">
+        <img id="icon" alt="" hidden>
+        <div class="grow">
+          <h2 id="title">Bitte Artikel wählen</h2>
+          <div class="subtitle" id="sub">Links suchen und auswählen</div>
+        </div>
+        <button class="btn-ghost" id="refresh" type="button" disabled>AKTUALISIEREN</button>
+      </div>
+
+      <div class="card empty-state" id="empty">Links einen Artikel wählen – oben suchen, Enter wählt den ersten Treffer.</div>
+
+      <div id="result" hidden>
+        <div class="hubs" id="hubs"></div>
+
+        <div class="card routes">
+          <h3>Beste Arbitrage-Routen</h3>
+          <div class="small" style="margin-bottom:4px">Einkauf per Sell-Order am Start-Hub, Verkauf an die Buy-Order am Ziel-Hub, abzüglich Sales Tax</div>
+          <div id="routes"></div>
+          <div class="foot">
+            <label class="k" for="acct">Accounting-Skill</label>
+            <select id="acct"></select>
+            <span class="small grow" id="taxinfo"></span>
+          </div>
+        </div>
+
+        <div class="card mats">
+          <h3 id="mats-title">Baumaterialien</h3>
+          <div class="bpline" id="bpline">–</div>
+          <div class="foot" style="margin:0 0 8px">
+            <label class="k" for="runs">Runs</label>
+            <input id="runs" type="number" min="1" max="100000" step="1" value="1">
+            <label class="k" for="me">ME</label>
+            <input id="me" type="number" min="0" max="10" step="1" value="10">
+            <span class="small grow" id="mats-out"></span>
+          </div>
+          <div class="mats-scroll">
+            <table>
+              <thead id="mats-head"></thead>
+              <tbody id="mats"></tbody>
+            </table>
+          </div>
+          <div class="foot">
+            <span class="small grow">ohne Struktur-/Rig-Boni · Mengen wie im Industry-Fenster gerundet · Kosten = Ø Sell je Hub (nach Stückzahl gewichtet, ohne Fantasiepreise)</span>
+            <button class="btn-ghost" id="copy-mats" type="button" disabled>MULTIBUY KOPIEREN</button>
+          </div>
+        </div>
+
+        <div class="card bob" id="bob-card" hidden>
+          <h3>Bauen oder kaufen?</h3>
+          <div class="bob-verdict" id="bob-verdict">–</div>
+          <div class="foot" style="margin:0 0 8px">
+            <label class="k" for="jobpct" title="Installationskosten des Jobs in % der Materialkosten (System-Kostenindex + Facility-Steuer, grob)">Job-Kosten</label>
+            <input id="jobpct" type="number" min="0" max="50" step="0.5" value="4"><span class="small">%</span>
+            <label class="k" for="bpmode" style="margin-left:14px">Blueprint</label>
+            <select id="bpmode"><option value="have">schon vorhanden</option><option value="buy" selected>kaufen, umlegen auf</option></select>
+            <input id="bpunits" type="number" min="1" max="1000000" step="1" value="100"><span class="small">Stück</span>
+          </div>
+          <div class="small" id="bp-note" style="margin:-4px 0 8px"></div>
+          <div class="mats-scroll">
+            <table>
+              <thead id="bob-head"></thead>
+              <tbody id="bob"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span class="dot" id="dot">●</span>
+    <span id="status">Lade Daten …</span>
+    <span class="credit">Preise live: <a href="https://esi.evetech.net/" target="_blank" rel="noopener">EVE ESI</a> · Nur Orders direkt an der Station · Ø = nach Stückzahl gewichtet, ohne Fantasiepreise · EVE Online © CCP hf.</span>
+  </footer>
+</div>
+
+<div class="mo-pop" id="mo-pop" role="dialog" aria-modal="false" aria-labelledby="mo-title" hidden></div>
+
+<script>
+"use strict";
+
+// ---------------------------------------------------------------- Konstanten
+const ESI = "https://esi.evetech.net/latest";
+const STATIONS = [
+  { name: "Jita 4-4",   station: 60003760, region: 10000002 },
+  { name: "Amarr VIII", station: 60008494, region: 10000043 },
+  { name: "Dodixie IX", station: 60011866, region: 10000032 },
+  { name: "Rens VI",    station: 60004588, region: 10000030 },
+];
+// Auf dem Lincolnsoft Server (lincolnsoft.de) bleiben Links und EVE-Login auf dem Server,
+// sonst (GitHub Pages) wie bisher auf github.io.
+const ON_LINCOLNSOFT = /(^|\.)lincolnsoft\.de$/.test(location.hostname);
+const TOOL_URL = ON_LINCOLNSOFT ? "/invention-helper/" : "https://markussauck-hub.github.io/eve-invention-helper/";
+document.getElementById("to-tool")?.setAttribute("href", TOOL_URL);
+if (ON_LINCOLNSOFT) document.getElementById("to-home")?.setAttribute("href", "/");
+const BASE_TAX = 0.075;          // Sales Tax ohne Skill
+const ROUTES_SHOWN = 3;
+const CHUNK = 250;               // Listeneinträge, die pro Schritt gerendert werden (Rest beim Scrollen)
+const ROMAN = ["0", "I", "II", "III", "IV", "V"];
+const STATUS = { ok: "var(--pos)", busy: "var(--accent)", warn: "var(--warn)", err: "var(--neg)" };
+
+// ---------------------------------------------------------------- Helfer
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const fmt = (n) => Number(n).toLocaleString("de-DE");
+const fmtIsk = (n) => (n == null ? "–" : `${Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ISK`);
+const fmtSigned = (n, d = 2) => Number(n).toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d, signDisplay: "always" });
+const short = (s) => s.split(" ")[0];
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// localStorage kann in privaten Fenstern fehlen oder werfen -> immer abfangen
+const store = {
+  get(key, fallback) { try { const v = localStorage.getItem("epc." + key); return v == null ? fallback : JSON.parse(v); } catch { return fallback; } },
+  set(key, value) { try { localStorage.setItem("epc." + key, JSON.stringify(value)); } catch { /* egal */ } },
+};
+
+// ---------------------------------------------------------------- Zustand
+let ITEMS = [], BY_ID = new Map(), filtered = [], rendered = 0, selIdx = -1, current = null, generated = "";
+let results = null, loadToken = 0;
+let BUILD = null, matList = [];
+let matPrices = {}, matToken = 0;          // typeId -> [Hub-Ergebnis je Station] (Ø Sell der Baumaterialien)
+const priceCache = new Map();              // "station:typeId" -> { t, r } – 5 Minuten
+const PRICE_TTL = 5 * 60 * 1000;
+let acctChar = null;          // Name des Charakters, wenn Accounting aus dem EVE-Login stammt
+let accounting = Math.min(5, Math.max(0, Number(store.get("accounting", 5)) || 0));
+
+const salesTax = () => BASE_TAX * (1 - 0.11 * accounting);
+
+function setStatus(text, level = "ok") {
+  $("dot").style.color = STATUS[level] || "var(--muted)";
+  const s = $("status");
+  s.textContent = text;
+  s.style.color = level === "err" || level === "warn" ? STATUS[level] : "var(--muted)";
+}
+
+// ---------------------------------------------------------------- Sternenfeld (wie Invention Helper)
+(() => {
+  const cv = $("sky"), ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let stars = [], w = 0, h = 0;
+  function rand(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+  function build() {
+    const dpr = window.devicePixelRatio || 1;
+    w = innerWidth; h = innerHeight;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const r = rand(42), tints = ["255,255,255", "227,241,255", "194,226,255", "159,210,255", "127,207,255"];
+    const n = Math.max(120, Math.round(420 * (w * h) / (1920 * 1080)));
+    stars = Array.from({ length: n }, () => {
+      const roll = r();
+      return {
+        x: r() * w, y: r() * h, tint: tints[Math.floor(r() * tints.length)],
+        size: roll < .72 ? 1 : roll < .95 ? 1.6 : 2.4,
+        bright: roll >= .95,
+        a: roll < .72 ? .25 + r() * .45 : .55 + r() * .4,
+        tw: r() < .08 ? .6 + r() * 1.6 : 0, ph: r() * Math.PI * 2,
+      };
+    });
+    draw(0);
+  }
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    for (const s of stars) {
+      const a = s.tw ? s.a * (.55 + .45 * Math.sin(t / 1000 * s.tw + s.ph)) : s.a;
+      if (s.bright) {
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 9);
+        g.addColorStop(0, "rgba(127,207,255,.35)"); g.addColorStop(1, "rgba(127,207,255,0)");
+        ctx.fillStyle = g; ctx.fillRect(s.x - 9, s.y - 9, 18, 18);
+        ctx.strokeStyle = `rgba(${s.tint},${a * .45})`; ctx.lineWidth = .6;
+        ctx.beginPath(); ctx.moveTo(s.x - 10, s.y); ctx.lineTo(s.x + 10, s.y); ctx.moveTo(s.x, s.y - 10); ctx.lineTo(s.x, s.y + 10); ctx.stroke();
+      }
+      ctx.fillStyle = `rgba(${s.tint},${a})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  let last = 0, tm = 0;
+  function loop(t) { if (t - last > 120) { draw(t); last = t; } requestAnimationFrame(loop); }
+  addEventListener("resize", () => { clearTimeout(tm); tm = setTimeout(build, 150); });
+  build();
+  if (!reduce) requestAnimationFrame(loop);
+})();
+
+// ---------------------------------------------------------------- ESI
+async function esiGet(url) {
+  // ohne eigene Header -> kein CORS-Preflight; 502/503/504 bis zu 3x wiederholen
+  for (let attempt = 1; ; attempt++) {
+    let res;
+    try { res = await fetch(url); }
+    catch (e) { if (attempt >= 3) throw new Error("Netzwerkfehler"); await sleep(800 * attempt); continue; }
+    if (res.ok) return res;
+    if (attempt >= 3 || ![420, 429, 502, 503, 504].includes(res.status)) throw new Error(`HTTP ${res.status}`);
+    await sleep(1000 * attempt);
+  }
+}
+
+async function fetchOrders(region, typeId) {
+  const url = (p) => `${ESI}/markets/${region}/orders/?datasource=tranquility&order_type=all&type_id=${typeId}&page=${p}`;
+  const first = await esiGet(url(1));
+  let orders = await first.json();
+  let pages = Number(first.headers.get("X-Pages")) || 0;
+  if (!pages) pages = orders.length >= 1000 ? 99 : 1;  // falls der Header nicht lesbar ist
+  for (let p = 2; p <= pages; p++) {
+    const page = await (await esiGet(url(p))).json();
+    if (!page.length) break;
+    orders = orders.concat(page);
+  }
+  return orders;
+}
+
+async function fetchHub(hub, typeId) {
+  try {
+    const orders = (await fetchOrders(hub.region, typeId)).filter((o) => o.location_id === hub.station);
+    const buyO = orders.filter((o) => o.is_buy_order), sellO = orders.filter((o) => !o.is_buy_order);
+    const buys = buyO.map((o) => o.price), sells = sellO.map((o) => o.price);
+    const buy = buys.length ? Math.max(...buys) : null, sell = sells.length ? Math.min(...sells) : null;
+    // Durchschnitt nach Stückzahl gewichtet (volume_remain); Fantasiepreise fliegen raus:
+    // Sells über dem 10-Fachen des niedrigsten Sells, Buys unter 1/10 des höchsten Buys
+    const wavg = (os) => {
+      const vol = os.reduce((a, o) => a + (o.volume_remain || 0), 0);
+      return vol ? os.reduce((a, o) => a + o.price * (o.volume_remain || 0), 0) / vol : null;
+    };
+    return { buy, sell,
+             avgBuy: wavg(buyO.filter((o) => o.price >= buy / 10)),
+             avgSell: wavg(sellO.filter((o) => o.price <= sell * 10)),
+             nBuy: buys.length, nSell: sells.length, error: null,
+             // für das Order-Popup ("View Market Details"): Sells aufsteigend, Buys absteigend
+             sellOrders: sellO.slice().sort((a, b) => a.price - b.price),
+             buyOrders: buyO.slice().sort((a, b) => b.price - a.price) };
+  } catch (e) {
+    return { buy: null, sell: null, avgBuy: null, avgSell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120),
+             sellOrders: [], buyOrders: [] };
+  }
+}
+
+function calcRoute(srcSell, dstBuy) {
+  if (srcSell == null || dstBuy == null || srcSell <= 0) return null;
+  const profit = dstBuy * (1 - salesTax()) - srcSell;
+  return { profit, pct: profit / srcSell * 100 };
+}
+
+// ---------------------------------------------------------------- Laden
+async function init() {
+  $("hublist").textContent = STATIONS.map((s) => s.name).join("  ·  ");
+  $("acct").innerHTML = ROMAN.map((r, i) => `<option value="${i}">${i ? "Accounting " + r : "ohne Skill"}</option>`).join("");
+  $("acct").value = String(accounting);
+  updateTaxInfo();
+
+  $("runs").value = store.get("runs", 1);
+  $("me").value = store.get("me", 10);
+  fetch("build.json", { cache: "no-cache" })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+    .then((d) => { BUILD = d; if (current) { renderMats(); loadMatPrices(); } })
+    .catch((e) => { BUILD = { failed: String(e.message || e) }; if (current) renderMats(); });
+
+  setStatus("Lade Item-Liste …", "busy");
+  try {
+    const res = await fetch("items.json", { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    ITEMS = data.items.map(([id, name]) => ({ id, name, low: name.toLowerCase() }));
+    BY_ID = new Map(ITEMS.map((it) => [it.id, it]));
+    generated = data.generated ? new Date(data.generated).toLocaleDateString("de-DE") : "?";
+  } catch (e) {
+    setStatus(`Item-Liste konnte nicht geladen werden (${e.message})`, "err");
+    $("list").innerHTML = `<li class="empty">items.json fehlt oder ist defekt.</li>`;
+    return;
+  }
+
+  $("search").disabled = false;
+  $("search").focus();
+  applyFilter();
+  openFromHash() || setStatus(`Bereit · ${fmt(ITEMS.length)} Items · Item-Liste vom ${generated}`);
+}
+
+// ---------------------------------------------------------------- Liste
+function applyFilter() {
+  const q = $("search").value.trim().toLowerCase();
+  if (!q) {
+    filtered = ITEMS;
+  } else {
+    // Treffer am Wortanfang zuerst, dann Teilstring-Treffer (wie Desktop)
+    const prefix = [], contains = [];
+    for (const it of ITEMS) {
+      if (it.low.startsWith(q)) prefix.push(it);
+      else if (it.low.includes(q)) contains.push(it);
+    }
+    filtered = prefix.concat(contains);
+  }
+  selIdx = current ? filtered.indexOf(current) : -1;
+  const list = $("list");
+  list.scrollTop = 0;
+  rendered = 0;
+  list.innerHTML = filtered.length ? "" : `<li class="empty">Kein handelbares Item gefunden.</li>`;
+  renderMore();
+  $("count").textContent = q ? `${fmt(filtered.length)} Treffer` : `${fmt(ITEMS.length)} Items`;
+}
+
+// Liste stückweise rendern: komplette Liste scrollbar, aber nur sichtbare Bereiche im DOM
+function renderMore(upTo = 0) {
+  const list = $("list");
+  do {
+    if (rendered >= filtered.length) return;
+    const end = Math.min(filtered.length, Math.max(rendered + CHUNK, upTo + 1));
+    let html = "";
+    for (let i = rendered; i < end; i++)
+      html += `<li role="option" data-i="${i}" aria-selected="${i === selIdx}">${esc(filtered[i].name)}</li>`;
+    list.insertAdjacentHTML("beforeend", html);
+    rendered = end;
+  } while (list.scrollHeight <= list.clientHeight + 200);   // Liste mindestens einmal überfüllen
+}
+$("list").addEventListener("scroll", () => {
+  const l = $("list");
+  if (l.scrollTop + l.clientHeight > l.scrollHeight - 400) renderMore();
+}, { passive: true });
+
+function highlight(i, scroll = true) {
+  const list = $("list");
+  if (i >= rendered) renderMore(i);
+  list.querySelector('[aria-selected="true"]')?.setAttribute("aria-selected", "false");
+  selIdx = i;
+  const li = list.querySelector(`[data-i="${i}"]`);
+  li?.setAttribute("aria-selected", "true");
+  if (scroll) li?.scrollIntoView({ block: "nearest" });
+}
+
+function select(i, scroll = true) {
+  if (i < 0 || i >= filtered.length) return;
+  highlight(i, scroll);
+  open(filtered[i]);
+}
+
+function open(item) {
+  current = item;
+  history.replaceState(null, "", `#${item.id}`);
+  $("to-tool").href = `${TOOL_URL}#${item.id}`;
+  loadPrices();
+}
+
+function openFromHash() {
+  const it = BY_ID.get(Number(location.hash.slice(1)));
+  if (!it) return false;
+  if (it !== current) {
+    const i = filtered.indexOf(it);
+    if (i >= 0) highlight(i); else $("list").querySelector('[aria-selected="true"]')?.setAttribute("aria-selected", "false");
+    open(it);
+  }
+  return true;
+}
+addEventListener("hashchange", openFromHash);
+
+$("list").addEventListener("click", (ev) => {
+  const li = ev.target.closest("li[data-i]");
+  if (li) Sound.blip();
+  if (li) select(Number(li.dataset.i), false);
+});
+
+$("search").addEventListener("input", applyFilter);
+$("search").addEventListener("keydown", (ev) => {
+  if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+    ev.preventDefault();
+    if (!filtered.length) return;
+    const d = ev.key === "ArrowDown" ? 1 : -1;
+    highlight(Math.max(0, Math.min(filtered.length - 1, (selIdx < 0 ? (d > 0 ? -1 : filtered.length) : selIdx) + d)));
+  } else if (ev.key === "Enter") {
+    ev.preventDefault();
+    const q = $("search").value.trim().toLowerCase();
+    const exact = filtered.findIndex((it) => it.low === q);
+    select(exact >= 0 ? exact : selIdx >= 0 ? selIdx : 0);
+  } else if (ev.key === "Escape") {
+    $("search").value = ""; applyFilter();
+  }
+});
+
+$("refresh").addEventListener("click", () => { if (!current) return; priceCache.clear(); loadPrices(); });
+$("acct").addEventListener("change", () => {
+  accounting = Number($("acct").value);
+  acctChar = null;
+  store.set("accounting", accounting);
+  updateTaxInfo();
+  if (results) renderRoutes();
+});
+
+function updateTaxInfo() {
+  const pct = (salesTax() * 100).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+  $("taxinfo").textContent = `Sales Tax ${pct} %` + (acctChar ? ` · Accounting aus ${acctChar}` : "");
+}
+
+// ---------------------------------------------------------------- Preise
+async function loadPrices() {
+  const item = current, token = ++loadToken;
+  $("empty").hidden = true;
+  $("result").hidden = false;
+  $("title").textContent = item.name;
+  $("sub").textContent = `TypeID ${item.id} · lade Preise …`;
+  $("icon").src = `https://images.evetech.net/types/${item.id}/icon?size=64`;
+  $("icon").hidden = false;
+  $("icon").onerror = () => { $("icon").hidden = true; };
+  $("refresh").disabled = true;
+  if (!results) renderSkeleton();
+  renderMats();
+  $("result").classList.add("loading");
+  setStatus(`Lade Daten für ${item.name} …`, "busy");
+  Sound.computeStart();
+
+  loadMatPrices();                                                 // läuft parallel zu den Hub-Preisen
+  const res = await Promise.all(STATIONS.map((h) => fetchHub(h, item.id)));
+  if (token !== loadToken) { Sound.computeStop(null); return; }   // inzwischen anderes Item gewählt
+
+  results = res;
+  $("result").classList.remove("loading");
+  $("refresh").disabled = false;
+  renderHubs();
+  if (MO.hub >= 0 && !$("mo-pop").hidden) moRender(MO.hub) || moClose(true);
+  renderRoutes();
+  renderMats();
+
+  const time = new Date().toLocaleTimeString("de-DE");
+  $("sub").textContent = `TypeID ${item.id} · Stand ${time}`;
+  const errors = STATIONS.map((h, i) => res[i].error && `${h.name}: ${res[i].error}`).filter(Boolean);
+  Sound.computeStop(errors.length ? "err" : "ok");
+  if (errors.length) setStatus(`Fehler – ${errors.join(" | ")}`, "err");
+  else setStatus(`Bereit · ${item.name} · ${time}`);
+}
+
+function renderSkeleton() {
+  $("hubs").innerHTML = STATIONS.map((h) => `
+    <div class="card hub">
+      <h3>${esc(h.name)}</h3>
+      <div class="row"><span class="k">Höchstes Buy</span><span class="v">–</span></div>
+      <div class="row"><span class="k">Niedrigstes Sell</span><span class="v">–</span></div>
+      <div class="row avg"><span class="k">Ø Buy</span><span class="v dim">–</span></div>
+      <div class="row avg"><span class="k">Ø Sell</span><span class="v dim">–</span></div>
+    </div>`).join("");
+}
+
+function renderHubs() {
+  const buys = results.map((r) => r.buy).filter((v) => v != null);
+  const sells = results.map((r) => r.sell).filter((v) => v != null);
+  const bestBuy = buys.length ? Math.max(...buys) : null;
+  const bestSell = sells.length ? Math.min(...sells) : null;
+  const best = (v, b) => v != null && v === b && STATIONS.length > 1;
+
+  $("hubs").innerHTML = STATIONS.map((h, i) => {
+    const r = results[i];
+    const spread = r.buy != null && r.sell != null
+      ? `<div class="row"><span class="k">Spanne</span><span class="spread">${fmtSigned((r.sell - r.buy) / r.buy * 100, 1).replace("+", "")} %</span></div>`
+      : "";
+    return `
+    <div class="card hub" data-hub="${i}">
+      <h3><button class="hub-name" type="button" data-hub="${i}" aria-haspopup="dialog" title="Alle Orders an ${esc(h.name)} anzeigen (wie „View Market Details“)">${esc(h.name)}<span class="mo-ico" aria-hidden="true">▤ ORDERS</span></button></h3>
+      <div class="row"><span class="k">Höchstes Buy <span class="small">(${fmt(r.nBuy)})</span></span>
+        <span class="v${best(r.buy, bestBuy) ? " best" : ""}">${fmtIsk(r.buy)}</span></div>
+      <div class="row"><span class="k">Niedrigstes Sell <span class="small">(${fmt(r.nSell)})</span></span>
+        <span class="v${best(r.sell, bestSell) ? " best" : ""}">${fmtIsk(r.sell)}</span></div>
+      <div class="row avg" title="Durchschnitt der Buy-Orders an der Station, gewichtet nach Stückzahl (ohne Orders unter 1/10 des höchsten Buys)"><span class="k">Ø Buy</span><span class="v dim">${fmtIsk(r.avgBuy)}</span></div>
+      <div class="row avg" title="Durchschnitt der Sell-Orders an der Station, gewichtet nach Stückzahl (ohne Orders über dem 10-Fachen des niedrigsten Sells)"><span class="k">Ø Sell</span><span class="v dim">${fmtIsk(r.avgSell)}</span></div>
+      ${spread}
+      ${r.error ? `<div class="err">${esc(r.error)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function renderRoutes() {
+  const routes = [];
+  STATIONS.forEach((src, i) => STATIONS.forEach((dst, j) => {
+    if (i === j) return;
+    const r = calcRoute(results[i].sell, results[j].buy);
+    if (r) routes.push({ ...r, src: src.name, dst: dst.name });
+  }));
+  routes.sort((a, b) => b.profit - a.profit);
+
+  const rows = [];
+  for (let n = 0; n < ROUTES_SHOWN; n++) {
+    const r = routes[n];
+    if (!r) { rows.push(`<div class="row"><span class="k"><span class="rank">${n + 1}</span>–</span><span class="v dim">–</span></div>`); continue; }
+    const cls = r.profit > 0 ? "pos" : "neg";
+    rows.push(`<div class="row">
+      <span class="k"><span class="rank">${n + 1}</span>${esc(short(r.src))} <span class="via">→</span> ${esc(short(r.dst))}</span>
+      <span class="v ${cls}">${fmtSigned(r.profit)} ISK<span class="pct">${fmtSigned(r.pct, 1)} %</span></span>
+    </div>`);
+  }
+  $("routes").innerHTML = rows.join("");
+}
+
+// ---------------------------------------------------------------- Order-Popup ("View Market Details")
+const MO = { hub: -1, pinned: false, openT: 0, closeT: 0 };
+const RANGE = { station: "Station", solarsystem: "System", region: "Region" };
+const fmtRange = (r) => RANGE[r] ?? (/^\d+$/.test(r) ? `${r} ${r === "1" ? "Sprung" : "Sprünge"}` : r);
+function fmtExpires(o) {
+  const ms = new Date(o.issued).getTime() + o.duration * 864e5 - Date.now();
+  if (!(ms > 0)) return "abgelaufen";
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
+}
+const qty = (n) => Number(n).toLocaleString("de-DE");
+const price = (n) => Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function moTable(orders, buy) {
+  if (!orders.length) return `<div class="mo-empty">Keine ${buy ? "Buy" : "Sell"}-Orders an dieser Station.</div>`;
+  const head = buy
+    ? `<tr><th>Menge</th><th>Preis (ISK)</th><th class="l">Reichweite</th><th>Min. Menge</th><th>Läuft ab</th></tr>`
+    : `<tr><th>Menge</th><th>Preis (ISK)</th><th>Läuft ab</th></tr>`;
+  const rows = orders.map((o, i) => buy
+    ? `<tr${i ? "" : ' class="top"'}><td>${qty(o.volume_remain)}</td><td>${price(o.price)}</td><td class="l">${esc(fmtRange(String(o.range)))}</td><td>${qty(o.min_volume || 1)}</td><td>${fmtExpires(o)}</td></tr>`
+    : `<tr${i ? "" : ' class="top"'}><td>${qty(o.volume_remain)}</td><td>${price(o.price)}</td><td>${fmtExpires(o)}</td></tr>`).join("");
+  return `<div class="mo-scroll"><table class="mo-tbl"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function moRender(i) {
+  const h = STATIONS[i], r = results?.[i];
+  if (!r) return false;
+  const vol = (os) => qty(os.reduce((a, o) => a + (o.volume_remain || 0), 0));
+  $("mo-pop").innerHTML = `
+    <div class="mo-head">
+      <h4 id="mo-title">${esc(h.name)} · ${esc(current?.name || "")}</h4>
+      <span class="small">${esc($("sub").textContent.replace(/^TypeID \d+ · /, ""))}</span>
+      <button class="mo-close" type="button" aria-label="Schließen" title="Schließen (Esc)">✕</button>
+    </div>
+    <div class="mo-body">
+      ${r.error ? `<div class="err" style="margin-top:8px">${esc(r.error)}</div>` : ""}
+      <div class="mo-sec sell"><h5>Verkäufer (Sellers) <span class="small">${fmt(r.sellOrders.length)} Orders · ${vol(r.sellOrders)} Stück</span></h5>${moTable(r.sellOrders, false)}</div>
+      <div class="mo-sec buy"><h5>Käufer (Buyers) <span class="small">${fmt(r.buyOrders.length)} Orders · ${vol(r.buyOrders)} Stück</span></h5>${moTable(r.buyOrders, true)}</div>
+    </div>`;
+  $("mo-pop").querySelector(".mo-close").onclick = () => moClose(true);
+  return true;
+}
+
+function moPlace(i) {
+  const pop = $("mo-pop"), card = document.querySelector(`.card.hub[data-hub="${i}"]`);
+  if (!card || innerWidth <= 640) return;             // Handy: CSS legt es als Panel unten an
+  const c = card.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight, gap = 10, m = 12;
+  let left = c.right + gap;                            // bevorzugt rechts neben der Karte
+  if (left + pw > innerWidth - m) left = c.left - gap - pw;   // sonst links
+  if (left < m) left = Math.min(Math.max(m, c.left), innerWidth - pw - m);  // sonst über/unter der Karte
+  let top = left >= c.right || left + pw <= c.left ? c.top : c.bottom + gap;
+  if (top + ph > innerHeight - m) top = Math.max(m, innerHeight - ph - m);
+  pop.style.left = `${Math.round(left)}px`; pop.style.top = `${Math.round(top)}px`;
+}
+
+function moOpen(i, pin) {
+  clearTimeout(MO.closeT);
+  if (MO.hub === i && !$("mo-pop").hidden) { if (pin) MO.pinned = true; return; }
+  if (!moRender(i)) return;
+  MO.hub = i; MO.pinned = !!pin;
+  document.querySelectorAll(".hub-name").forEach((b) => b.setAttribute("aria-expanded", String(Number(b.dataset.hub) === i)));
+  const pop = $("mo-pop"); pop.hidden = false; moPlace(i);
+  if (typeof Sound !== "undefined") Sound.blip();
+}
+function moClose(force) {
+  if (MO.pinned && !force) return;
+  clearTimeout(MO.openT); clearTimeout(MO.closeT);
+  $("mo-pop").hidden = true; MO.hub = -1; MO.pinned = false;
+  document.querySelectorAll(".hub-name").forEach((b) => b.setAttribute("aria-expanded", "false"));
+}
+
+// Hover (nur mit Maus) mit kurzer Verzögerung, Klick auf den Hub-Namen pinnt
+const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+$("hubs").addEventListener("mouseover", (ev) => {
+  if (!canHover || !results) return;
+  const card = ev.target.closest(".card.hub"); if (!card) return;
+  const i = Number(card.dataset.hub);
+  clearTimeout(MO.closeT); clearTimeout(MO.openT);
+  if (MO.pinned && MO.hub !== i) return;
+  MO.openT = setTimeout(() => moOpen(i, false), MO.hub >= 0 ? 80 : 350);
+});
+$("hubs").addEventListener("mouseout", (ev) => {
+  if (!canHover) return;
+  const to = ev.relatedTarget;
+  if (to && (to.closest?.(".card.hub") || to.closest?.("#mo-pop"))) return;
+  clearTimeout(MO.openT); MO.closeT = setTimeout(() => moClose(false), 220);
+});
+$("mo-pop").addEventListener("mouseenter", () => clearTimeout(MO.closeT));
+$("mo-pop").addEventListener("mouseleave", (ev) => {
+  if (ev.relatedTarget?.closest?.(".card.hub")) return;
+  MO.closeT = setTimeout(() => moClose(false), 220);
+});
+$("hubs").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".hub-name"); if (!b) return;
+  ev.stopPropagation();
+  const i = Number(b.dataset.hub);
+  if (MO.hub === i && MO.pinned) moClose(true); else { MO.hub = -1; moOpen(i, true); }
+});
+$("mo-pop").addEventListener("click", (ev) => ev.stopPropagation());
+addEventListener("click", () => { if (!$("mo-pop").hidden) moClose(true); });
+addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !$("mo-pop").hidden) moClose(true); });
+addEventListener("resize", () => { if (MO.hub >= 0) moPlace(MO.hub); });
+addEventListener("scroll", () => { if (MO.hub >= 0 && !MO.pinned) moClose(true); else if (MO.hub >= 0) moPlace(MO.hub); }, { passive: true });
+
+// ---------------------------------------------------------------- Baumaterialien
+// Ø-Kosten der Materialien je Hub: ESI-Orders pro Material und Region, gecacht, max. 6 Anfragen gleichzeitig
+async function hubCached(hub, typeId) {
+  const key = `${hub.station}:${typeId}`, hit = priceCache.get(key);
+  if (hit && Date.now() - hit.t < PRICE_TTL && !hit.r.error) return hit.r;
+  const r = await fetchHub(hub, typeId);
+  priceCache.set(key, { t: Date.now(), r });
+  return r;
+}
+
+async function pool(tasks, limit) {
+  let i = 0;
+  const worker = async () => { while (i < tasks.length) { const t = tasks[i++]; await t(); } };
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+}
+
+async function loadMatPrices() {
+  const token = ++matToken, rec = BUILD && !BUILD.failed && current ? BUILD.r[current.id] : null;
+  matPrices = {};
+  if (!rec) return;
+  const ids = rec[3].map(([id]) => id);
+  ids.forEach((id) => { matPrices[id] = STATIONS.map(() => null); });
+  const bpKey = "bp:" + rec[0];
+  matPrices[bpKey] = STATIONS.map(() => null);
+  let pending = 0;
+  const tasks = [];
+  STATIONS.forEach((h, s) => tasks.push(async () => {
+    const r = await hubCached(h, rec[0]);
+    if (token !== matToken) return;
+    matPrices[bpKey][s] = r;
+  }));
+  ids.forEach((id) => STATIONS.forEach((h, s) => tasks.push(async () => {
+    const r = await hubCached(h, id);
+    if (token !== matToken) return;                                // anderes Item gewählt
+    matPrices[id][s] = r;
+    if (++pending % 4 === 0) renderMats();                         // Zwischenstand zeigen
+  })));
+  renderMats();
+  await pool(tasks, 6);
+  if (token === matToken) renderMats();
+}
+
+const round2 = (x) => Math.round(x * 100) / 100;
+// Menge pro Job wie im Spiel: mindestens 1 je Run, ME wirkt auf die Gesamtmenge
+const withME = (runs, qty, me) => Math.max(runs, Math.ceil(round2(runs * qty * (1 - me / 100))));
+const bname = (id) => BUILD?.names?.[id] ?? BY_ID.get(Number(id))?.name ?? `#${id}`;
+const tagHtml = (id) => {
+  const t = BUILD?.tags?.[id];
+  return t === "S" ? '<span class="tag S">SALVAGE</span>' : t === "P" ? '<span class="tag P">PI</span>' : "";
+};
+const clampInt = (el, lo, hi, fallback) => {
+  const v = Math.round(Number(el.value));
+  return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback;
+};
+
+function renderMats() {
+  const tbody = $("mats"), btn = $("copy-mats");
+  matList = [];
+  $("bob-card").hidden = true;                       // wird erst gezeigt, wenn Rezept + Preise da sind
+  btn.disabled = true;
+  $("mats-out").textContent = "";
+  const ncol = 3 + STATIONS.length;
+  $("mats-head").innerHTML = `<tr><th>Material</th><th>Pro Run</th><th>Gesamt</th>${STATIONS.map((h, s) =>
+    `<th class="hub" title="Ø Sell pro Stück an ${esc(h.name)}">Ø ${esc(short(h.name))}</th>`).join("")}</tr>`;
+  const empty = (msg) => { tbody.innerHTML = `<tr><td class="placeholder" colspan="${ncol}">${esc(msg)}</td></tr>`; };
+
+  if (!current) return empty("–");
+  if (!BUILD) { $("bpline").textContent = "Lade Bau-Rezepte …"; return empty("…"); }
+  if (BUILD.failed) { $("bpline").textContent = `Bau-Rezepte nicht verfügbar (${BUILD.failed})`; return empty("–"); }
+
+  const rec = BUILD.r[current.id];
+  $("me").disabled = $("runs").disabled = !rec;
+  if (!rec) {
+    $("mats-title").textContent = "Baumaterialien";
+    $("bpline").textContent = "Nicht baubar – kein Blueprint und keine Reaktion im SDE.";
+    return empty("–");
+  }
+
+  const [bp, act, outQty, mats] = rec;
+  const reaction = act === 11;
+  const runs = clampInt($("runs"), 1, 100000, 1);
+  const me = reaction ? 0 : clampInt($("me"), 0, 10, 10);
+  $("me").disabled = reaction;
+  $("mats-title").textContent = reaction ? "Reaktionsmaterialien" : "Baumaterialien";
+  $("bpline").innerHTML = `${reaction ? "Reaktion" : "Blueprint"}: <b>${esc(bname(bp))}</b> · 1 Run = ${fmt(outQty)} Stück`;
+  $("mats-out").textContent = `Ergebnis: ${fmt(runs * outQty)} × ${current.name}`;
+
+  matList = mats.map(([id, q]) => [bname(id), withME(runs, q, me)]);
+  const totalUnits = matList.reduce((a, [, q]) => a + q, 0);
+
+  // Ø Sell pro Stück je Hub; günstigster Hub pro Material wird hervorgehoben
+  const unit = (id, s) => matPrices[id]?.[s];                      // undefined = nicht geladen, null = lädt
+  const price = (id, s) => unit(id, s)?.avgSell ?? null;
+  const isk = (n) => n == null ? "–" : Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const hubCells = (id) => {
+    const ps = STATIONS.map((_, s) => price(id, s)), min = Math.min(...ps.filter((v) => v != null));
+    return STATIONS.map((h, s) => {
+      const r = unit(id, s), first = s === 0 ? " first" : "";
+      if (r === null || r === undefined) return `<td class="hub loading${first}">…</td>`;
+      if (ps[s] == null) return `<td class="hub na${first}" title="Keine Sell-Orders an ${esc(h.name)}">–</td>`;
+      const cheap = ps[s] === min && STATIONS.length > 1 ? " cheap" : "";
+      return `<td class="hub${cheap}${first}" title="${esc(h.name)}: Ø Sell ${isk(ps[s])} ISK · niedrigstes Sell ${isk(r.sell)} ISK">${isk(ps[s])}</td>`;
+    }).join("");
+  };
+
+  // Summen je Hub: Gesamtmenge × Ø Sell; fehlt ein Preis, ist die Summe unvollständig (≥)
+  const sums = STATIONS.map((_, s) => {
+    let sum = 0, missing = 0, loading = 0;
+    mats.forEach(([id], i) => {
+      const r = unit(id, s);
+      if (r == null) loading++;
+      else if (r.avgSell == null) missing++;
+      else sum += r.avgSell * matList[i][1];
+    });
+    return { sum, missing, loading };
+  });
+  const complete = sums.filter((x) => !x.missing && !x.loading).map((x) => x.sum);
+  const bestSum = complete.length ? Math.min(...complete) : null;
+  const sumCell = (x, div, s) => {
+    const first = s === 0 ? " first" : "";
+    if (x.loading) return `<td class="hub loading${first}">…</td>`;
+    const best = !x.missing && x.sum === bestSum && STATIONS.length > 1 ? " best" : "";
+    const partial = x.missing ? `<span class="partial" title="${x.missing} Material(ien) ohne Sell-Orders – Summe unvollständig">≥</span>` : "";
+    return `<td class="hub${best}${first}">${partial}${isk(x.sum / div)}</td>`;
+  };
+  const produced = runs * outQty;
+
+  tbody.innerHTML = mats.map(([id, q], i) => `
+    <tr><td><span class="nm">${esc(bname(id))}</span>${tagHtml(id)}</td>
+        <td class="q dim">${fmt(q)}</td><td class="q">${fmt(matList[i][1])}</td>${hubCells(id)}</tr>`).join("")
+    + `<tr class="total"><td>${fmt(mats.length)} Materialien</td><td></td><td class="q">${fmt(totalUnits)}</td>${STATIONS.map((_, s) => `<td class="hub${s === 0 ? " first" : ""}"></td>`).join("")}</tr>`
+    + `<tr class="cost"><td>Materialkosten gesamt <span class="small">(ISK)</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, 1, s)).join("")}</tr>`
+    + (produced > 1 ? `<tr class="cost"><td>pro Stück <span class="small">(÷ ${fmt(produced)})</span></td><td></td><td></td>${sums.map((x, s) => sumCell(x, produced, s)).join("")}</tr>` : "");
+  btn.disabled = false;
+  renderBob(sums, produced, mats.length);
+}
+
+// ---------------------------------------------------------------- Bauen oder kaufen?
+function renderBob(sums, produced, nMats) {
+  const card = $("bob-card");
+  card.hidden = !results;
+  if (!results) return;
+  const isk = (n) => n == null ? "–" : Number(n).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const jobPct = Math.max(0, Number($("jobpct").value) || 0) / 100;
+  const tax = salesTax();
+  const rec = BUILD.r[current.id], bpId = rec[0], reaction = rec[1] === 11;
+  const bpMode = $("bpmode").value, bpUnits = Math.max(1, Math.round(Number($("bpunits").value) || 1));
+  $("bpunits").disabled = bpMode !== "buy";
+  const bpRes = matPrices["bp:" + bpId];                    // Hub-Ergebnisse des Blueprints (BPO-Marktpreis)
+  const bpPrice = (s) => bpRes?.[s]?.sell ?? null;
+  const tradeable = bpRes && bpRes.some((r) => r && r.sell != null);
+  $("bp-note").innerHTML = reaction ? "Reaktions-Formeln: einmalige Anschaffung, hier wie ein Blueprint behandelt."
+    : !bpRes ? "Lade Blueprint-Preise …"
+    : tradeable ? `${esc(bname(bpId))}: niedrigstes Sell je Hub, anteilig auf ${fmt(bpUnits)} Stück umgelegt.`
+    : `${esc(bname(bpId))} ist am Markt nicht erhältlich (z. B. T2 – nur als BPC per Invention). Kosten dafür im <a href="${TOOL_URL}#${current.id}">Invention Helper</a>.`;
+  const rows = STATIONS.map((h, s) => {
+    const x = sums[s], ok = !x.loading && !x.missing;
+    const mat = ok ? x.sum / produced : null;
+    const bp = bpMode === "have" ? 0 : (bpPrice(s) == null ? null : bpPrice(s) / bpUnits);
+    const build = mat == null ? null : mat * (1 + jobPct) + (bp ?? 0);
+    const buy = results[s].sell;                      // niedrigstes Sell = Kaufpreis
+    const sellTo = results[s].buy;                    // höchstes Buy = Sofortverkauf
+    return { h, mat, bp, build, buy, save: build != null && buy != null ? buy - build : null,
+             profit: build != null && sellTo != null ? sellTo * (1 - tax) - build : null };
+  });
+  $("bob-head").innerHTML = `<tr><th>pro Stück (ISK)</th>${STATIONS.map((h) => `<th class="hub">${esc(short(h.name))}</th>`).join("")}</tr>`;
+  const best = (key, hi) => { const v = rows.map((r) => r[key]).filter((n) => n != null); return v.length ? (hi ? Math.max(...v) : Math.min(...v)) : null; };
+  const bBuild = best("build"), bBuy = best("buy"), bSave = best("save", true), bProf = best("profit", true);
+  const cell = (v, b, signed) => `<td class="hub${v != null && v === b ? " best" : ""}${signed && v != null ? (v >= 0 ? " pos" : " neg") : ""}">${signed && v != null ? fmtSigned(v) : isk(v)}</td>`;
+  $("bob").innerHTML = [
+    `<tr class="lbl"><td>Materialien</td>${rows.map((r) => cell(r.mat)).join("")}</tr>`,
+    `<tr class="lbl"><td>+ Job-Kosten (${fmtSigned(jobPct * 100, 1).replace("+", "")} %)</td>${rows.map((r) => cell(r.mat == null ? null : r.mat * jobPct)).join("")}</tr>`,
+    `<tr class="lbl"><td>+ Blueprint ${bpMode === "have" ? '<span class="small">(vorhanden)</span>' : `<span class="small">(÷ ${fmt(bpUnits)})</span>`}</td>${rows.map((r) => cell(r.bp)).join("")}</tr>`,
+    `<tr><td><b>Baukosten</b></td>${rows.map((r) => cell(r.build, bBuild)).join("")}</tr>`,
+    `<tr><td><b>Kaufen</b> <span class="small">(niedrigstes Sell)</span></td>${rows.map((r) => cell(r.buy, bBuy)).join("")}</tr>`,
+    `<tr class="res"><td>Ersparnis durch Bauen</td>${rows.map((r) => cell(r.save, bSave, true)).join("")}</tr>`,
+    `<tr class="res"><td>Gewinn bei Verkauf <span class="small">(an Buy-Order, nach Tax)</span></td>${rows.map((r) => cell(r.profit, bProf, true)).join("")}</tr>`,
+  ].join("");
+
+  // Fazit: günstigste Bau-Option gegen günstigsten Kauf über alle Hubs
+  const b = rows.filter((r) => r.build != null).sort((p, q) => p.build - q.build)[0];
+  const k = rows.filter((r) => r.buy != null).sort((p, q) => p.buy - q.buy)[0];
+  if (!b || !k) { $("bob-verdict").innerHTML = `<span class="small">Warte auf Preise …</span>`; return; }
+  const diff = k.buy - b.build, pct = diff / k.buy * 100;
+  $("bob-verdict").innerHTML = diff > 0
+    ? `<span class="badge build">BAUEN</span><span>Bauen mit Materialien aus <b>${esc(short(b.h.name))}</b> kostet <b>${isk(b.build)} ISK</b> – <b class="pos">${fmtSigned(pct, 1).replace("+", "")} %</b> günstiger als Kaufen in ${esc(short(k.h.name))} (${isk(k.buy)} ISK).</span>`
+    : `<span class="badge buy">KAUFEN</span><span>Kaufen in <b>${esc(short(k.h.name))}</b> für <b>${isk(k.buy)} ISK</b> ist günstiger – Bauen kostet mindestens ${isk(b.build)} ISK (<b class="neg">${fmtSigned(-pct, 1).replace("+", "")} %</b> teurer).</span>`;
+}
+
+["jobpct", "bpunits", "bpmode"].forEach((id) => $(id).addEventListener("input", () => renderMats()));
+["runs", "me"].forEach((id) => $(id).addEventListener("input", () => {
+  store.set(id, Number($(id).value));
+  renderMats();
+}));
+
+async function copyList(items, btn, label) {
+  if (!items.length) return;
+  const text = items.map(([n, q]) => `${n}\t${q}`).join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = Object.assign(document.createElement("textarea"), { value: text });
+    document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove();
+  }
+  setStatus(`Multibuy kopiert · ${label} · ${items.length} Positionen – im Markt unter Multibuy → Einfügen`);
+  Sound.copy();
+  btn.textContent = "✔ KOPIERT";
+  btn.classList.add("done");
+  setTimeout(() => { btn.textContent = "MULTIBUY KOPIEREN"; btn.classList.remove("done"); }, 1500);
+}
+$("copy-mats").addEventListener("click", (ev) => {
+  const runs = clampInt($("runs"), 1, 100000, 1);
+  copyList(matList, ev.currentTarget, `Materialien für ${fmt(runs)} Run(s) ${current.name}`);
+});
+
+// ---------------------------------------------------------------- Sound (alles per Web Audio erzeugt, keine Dateien)
+const Sound = (() => {
+  let ctx = null, master, musicBus, fxBus, reverb, musicOn = false, fxOn = false;
+  let musicNodes = null, chordTimer = 0, pingTimer = 0, computeTimer = 0, computing = 0;
+  // Einstellungen gelten für alle LincolnSoft-Tools auf dieser Domain (Price Checker, Invention Helper)
+  const sget = (k, f) => { try { const v = localStorage.getItem("lincolnsoft.snd." + k) ?? localStorage.getItem("epc.snd." + k); return v == null ? f : JSON.parse(v); } catch { return f; } };
+  const sset = (k, v) => { try { localStorage.setItem("lincolnsoft.snd." + k, JSON.stringify(v)); } catch { /* egal */ } };
+  let vol = Math.min(100, Math.max(0, Number(sget("vol", 45))));
+  const want = { music: !!sget("music", false), fx: !!sget("fx", false) };
+
+  function ensure() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = (vol / 100) ** 2;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4;
+    master.connect(comp).connect(ctx.destination);
+    reverb = ctx.createConvolver(); reverb.buffer = impulse(4.5, 2.2);
+    const wet = ctx.createGain(); wet.gain.value = .55; reverb.connect(wet).connect(master);
+    musicBus = ctx.createGain(); musicBus.gain.value = 0; musicBus.connect(master); musicBus.connect(reverb);
+    fxBus = ctx.createGain(); fxBus.gain.value = .5; fxBus.connect(master);
+    const fxSend = ctx.createGain(); fxSend.gain.value = .25; fxBus.connect(fxSend).connect(reverb);
+    return true;
+  }
+
+  function impulse(seconds, decay) {
+    const len = Math.floor(ctx.sampleRate * seconds), buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** decay;
+    }
+    return buf;
+  }
+
+  // ---- Ambient: langsam wechselnde Flächen in D-Dorisch, Tiefpass mit LFO, vereinzelte Sternen-Pings
+  const CHORDS = [[50, 57, 62, 64, 69], [48, 55, 60, 64, 67], [46, 53, 58, 62, 65], [45, 52, 57, 60, 64]];
+  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+  let chordIdx = 0;
+
+  function startMusic() {
+    if (musicNodes) return;
+    const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 700; filter.Q.value = .7;
+    const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+    lfo.frequency.value = .045; lfoGain.gain.value = 380; lfo.connect(lfoGain).connect(filter.frequency); lfo.start();
+    filter.connect(musicBus);
+    // Grundton-Drohne
+    const drone = ctx.createOscillator(), dg = ctx.createGain();
+    drone.type = "sine"; drone.frequency.value = hz(38); dg.gain.value = .18; drone.connect(dg).connect(filter); drone.start();
+    // 5 Stimmen je 2 leicht verstimmte Oszillatoren
+    const voices = CHORDS[0].map((m) => {
+      const g = ctx.createGain(); g.gain.value = 0; g.connect(filter);
+      const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      const oscs = [-6, 6].map((cents, k) => {
+        const o = ctx.createOscillator(); o.type = k ? "triangle" : "sine";
+        o.frequency.value = hz(m); o.detune.value = cents;
+        if (pan) { pan.pan.value = Math.random() * 1.2 - .6; o.connect(pan).connect(g); } else o.connect(g);
+        o.start(); return o;
+      });
+      return { g, oscs };
+    });
+    musicNodes = { filter, lfo, drone, voices };
+    musicBus.gain.cancelScheduledValues(ctx.currentTime);
+    musicBus.gain.setValueAtTime(musicBus.gain.value, ctx.currentTime);
+    musicBus.gain.linearRampToValueAtTime(.32, ctx.currentTime + 6);
+    nextChord();
+    chordTimer = setInterval(nextChord, 14000);
+    schedulePing();
+  }
+
+  function nextChord() {
+    const t = ctx.currentTime, chord = CHORDS[chordIdx++ % CHORDS.length];
+    musicNodes.voices.forEach((v, i) => {
+      v.oscs.forEach((o) => o.frequency.setTargetAtTime(hz(chord[i]), t, 2.5));
+      v.g.gain.setTargetAtTime(.05 + Math.random() * .05, t, 3);
+    });
+  }
+
+  function schedulePing() {
+    pingTimer = setTimeout(() => {
+      if (!musicNodes) return;
+      const chord = CHORDS[(chordIdx + CHORDS.length - 1) % CHORDS.length];
+      tone(hz(chord[Math.floor(Math.random() * chord.length)] + 24), { type: "sine", gain: .05, attack: .02, release: 3.5, bus: musicBus });
+      schedulePing();
+    }, 5000 + Math.random() * 9000);
+  }
+
+  function stopMusic() {
+    if (!musicNodes) return;
+    clearInterval(chordTimer); clearTimeout(pingTimer);
+    const n = musicNodes; musicNodes = null;
+    const t = ctx.currentTime;
+    musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t);
+    musicBus.gain.linearRampToValueAtTime(0, t + 1.5);
+    setTimeout(() => { [n.lfo, n.drone, ...n.voices.flatMap((v) => v.oscs)].forEach((o) => o.stop()); n.filter.disconnect(); }, 1700);
+  }
+
+  // ---- Effekte
+  function tone(freq, { type = "sine", gain = .1, attack = .005, release = .12, at = 0, bus = fxBus, slide = 0 } = {}) {
+    const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(freq * slide, t + attack + release);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + attack);
+    g.gain.exponentialRampToValueAtTime(.0001, t + attack + release);
+    o.connect(g).connect(bus); o.start(t); o.stop(t + attack + release + .05);
+  }
+
+  const fxReady = () => fxOn && ensure();
+
+  function computeStart() {
+    computing++;
+    if (!fxReady() || computeTimer) return;
+    // Rechner-Geplapper: kurze Blips aus einer Pentatonik, leicht gefiltert
+    const scale = [1046, 1174, 1396, 1568, 1760, 2093, 2349];
+    const step = () => {
+      if (!computing || !fxOn) { computeTimer = 0; return; }
+      const n = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < n; i++)
+        tone(scale[Math.floor(Math.random() * scale.length)] * (Math.random() < .2 ? .5 : 1),
+             { type: Math.random() < .5 ? "square" : "triangle", gain: .028, release: .04 + Math.random() * .04, at: i * .045 });
+      computeTimer = setTimeout(step, 70 + Math.random() * 90);
+    };
+    tone(220, { type: "sawtooth", gain: .03, attack: .02, release: .35, slide: 4 });   // Hochfahren
+    step();
+  }
+
+  function computeStop(result = "ok") {
+    computing = Math.max(0, computing - 1);
+    if (computing || !fxReady()) return;
+    clearTimeout(computeTimer); computeTimer = 0;
+    if (result === null) return;
+    if (result === "ok") { tone(1318, { gain: .07, release: .25 }); tone(1975, { gain: .06, release: .5, at: .09 }); }
+    else { tone(330, { type: "triangle", gain: .09, release: .3 }); tone(247, { type: "triangle", gain: .09, release: .45, at: .16 }); }
+  }
+
+  let burstTimer = 0;
+  function burst() {
+    if (!fxReady()) return;
+    if (!burstTimer) computeStart();
+    clearTimeout(burstTimer);
+    burstTimer = setTimeout(() => { burstTimer = 0; computeStop("ok"); }, 380 + Math.random() * 260);
+  }
+
+  const blip = () => fxReady() && tone(1760, { type: "triangle", gain: .035, release: .05 });
+  const copy = () => { if (!fxReady()) return; [1568, 2093, 2637].forEach((f, i) => tone(f, { type: "square", gain: .03, release: .06, at: i * .06 })); };
+
+  // ---- Bedienung
+  function paint() {
+    for (const [id, on] of [["snd-music", musicOn], ["snd-fx", fxOn]]) {
+      $(id).classList.toggle("on", on); $(id).setAttribute("aria-pressed", String(on));
+    }
+  }
+  function setMusic(on) {
+    musicOn = on; sset("music", on); paint();
+    if (on) { if (ensure()) startMusic(); } else if (ctx) stopMusic();
+  }
+  function setFx(on) {
+    fxOn = on; sset("fx", on); paint();
+    if (on && ensure()) blip();
+  }
+
+  $("snd-music").addEventListener("click", () => setMusic(!musicOn));
+  $("snd-fx").addEventListener("click", () => setFx(!fxOn));
+  $("snd-vol").value = vol;
+  $("snd-vol").addEventListener("input", () => {
+    vol = Number($("snd-vol").value); sset("vol", vol);
+    if (ctx) master.gain.setTargetAtTime((vol / 100) ** 2, ctx.currentTime, .05);
+  });
+
+  // Gespeicherte Wahl: Browser erlauben Ton erst nach einer Interaktion -> beim ersten Klick/Tastendruck starten
+  fxOn = want.fx; musicOn = want.music; paint();
+  if (want.music || want.fx) {
+    const unlock = (ev) => {
+      if (ev.target.closest?.(".audio")) return;      // Klick auf die Schalter regelt das selbst
+      removeEventListener("pointerdown", unlock, true); removeEventListener("keydown", unlock, true);
+      if (ensure() && musicOn) startMusic();
+    };
+    addEventListener("pointerdown", unlock, true); addEventListener("keydown", unlock, true);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!ctx) return;
+    if (document.hidden && !musicOn) ctx.suspend(); else if (!document.hidden) ctx.resume();
+  });
+
+  return { computeStart, computeStop, burst, blip, copy, state: () => ({ ctx: ctx?.state ?? "none", music: !!musicNodes, computing, fx: fxOn }) };
+})();
+
+// ---------------------------------------------------------------- EVE SSO (optional: Skills des eigenen Charakters)
+// OAuth2 Authorization Code + PKCE, nur im Browser. Token + Skills bleiben in localStorage dieser Domain
+// und gelten für alle LincolnSoft-Tools (Price Checker, Invention Helper). Scope: nur Skills lesen.
+const EveSSO = (() => {
+  // Beide Tools teilen sich EINEN Callback (Price Checker); der leitet nach dem Login zum Ausgangstool zurück.
+  // Für lincolnsoft.de muss "https://lincolnsoft.de/price-checker/" als Callback in der EVE-Developer-App
+  // eingetragen sein. Falls dafür eine eigene App nötig ist: deren Client-ID hier eintragen.
+  const CLIENT_ID_GITHUB = "94d6ac30438c4a659e0a85f581990bdc";
+  const CLIENT_ID_LINCOLNSOFT = "9dd3ac42a4064a81980f5fb71e914a15";
+  const CLIENT_ID = ON_LINCOLNSOFT ? CLIENT_ID_LINCOLNSOFT : CLIENT_ID_GITHUB;
+  const CALLBACK = ON_LINCOLNSOFT
+    ? location.origin + "/price-checker/"
+    : "https://markussauck-hub.github.io/eve-price-checker/";
+  const SCOPE = "esi-skills.read_skills.v1";
+  const AUTH = "https://login.eveonline.com/v2/oauth/authorize/";
+  const TOKEN = "https://login.eveonline.com/v2/oauth/token";
+  const K = { auth: "lincolnsoft.sso", skills: "lincolnsoft.sso.skills", pending: "lincolnsoft.sso.pending" };
+  const SKILL_TTL = 10 * 60 * 1000;
+  const listeners = [];
+  let auth = null, skills = null, busy = false, error = "";
+
+  const load = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch { return null; } };
+  const save = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch { /* egal */ } };
+  const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const rnd = (n = 32) => b64url(crypto.getRandomValues(new Uint8Array(n)));
+  const jwt = (t) => JSON.parse(decodeURIComponent(escape(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")))));
+
+  function emit(fresh = false) {
+    paint();
+    const s = state();
+    listeners.forEach((cb) => { try { cb({ ...s, fresh }); } catch (e) { console.error(e); } });
+  }
+  function state() {
+    return { char: auth ? { id: auth.id, name: auth.name } : null, skills: skills?.levels || null, busy, error };
+  }
+
+  async function tokenRequest(params) {
+    const res = await fetch(TOKEN, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: CLIENT_ID, ...params }),
+    });
+    if (!res.ok) throw new Error(`Login-Server HTTP ${res.status}`);
+    const t = await res.json(), p = jwt(t.access_token);
+    const id = Number(String(p.sub).split(":").pop());
+    auth = { access: t.access_token, refresh: t.refresh_token || auth?.refresh, exp: Date.now() + (t.expires_in - 60) * 1000, id, name: p.name };
+    save(K.auth, auth);
+  }
+
+  async function accessToken() {
+    if (!auth) throw new Error("nicht angemeldet");
+    if (Date.now() < auth.exp) return auth.access;
+    await tokenRequest({ grant_type: "refresh_token", refresh_token: auth.refresh });
+    return auth.access;
+  }
+
+  async function loadSkills(force = false) {
+    if (!auth) return;
+    if (!force && skills && skills.id === auth.id && Date.now() - skills.at < SKILL_TTL) return;
+    busy = true; error = ""; paint();
+    try {
+      const res = await fetch(`https://esi.evetech.net/latest/characters/${auth.id}/skills/?datasource=tranquility`,
+        { headers: { Authorization: `Bearer ${await accessToken()}` } });
+      if (res.status === 401 || res.status === 403) throw new Error("Zugriff abgelehnt – bitte neu anmelden");
+      if (!res.ok) throw new Error(`ESI HTTP ${res.status}`);
+      const data = await res.json();
+      // active_skill_level: berücksichtigt Alpha-Klon-Grenzen
+      skills = { id: auth.id, at: Date.now(), sp: data.total_sp,
+                 levels: Object.fromEntries(data.skills.map((s) => [s.skill_id, s.active_skill_level])) };
+      save(K.skills, skills);
+    } catch (e) {
+      error = String(e.message || e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function login() {
+    const verifier = rnd(32);
+    const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+    const st = rnd(16);
+    save(K.pending, { state: st, verifier, ret: location.href.split("?")[0] });
+    location.href = AUTH + "?" + new URLSearchParams({
+      response_type: "code", redirect_uri: CALLBACK, client_id: CLIENT_ID, scope: SCOPE,
+      code_challenge: challenge, code_challenge_method: "S256", state: st,
+    });
+  }
+
+  function logout() {
+    const rt = auth?.refresh;
+    auth = null; skills = null; error = "";
+    save(K.auth, null); save(K.skills, null);
+    if (rt) fetch("https://login.eveonline.com/v2/oauth/revoke", { method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token_type_hint: "refresh_token", token: rt, client_id: CLIENT_ID }) }).catch(() => {});
+    emit();
+  }
+
+  // Rückkehr vom Login-Server (?code=…&state=…)
+  async function handleCallback() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has("code") && !q.has("error")) return false;
+    const pending = load(K.pending); save(K.pending, null);
+    history.replaceState(null, "", location.pathname + location.hash);
+    if (q.has("error")) { error = "Anmeldung abgebrochen"; return true; }
+    if (!pending || pending.state !== q.get("state")) { error = "Anmeldung ungültig (state) – bitte erneut versuchen"; return true; }
+    busy = true; paint();
+    try {
+      await tokenRequest({ grant_type: "authorization_code", code: q.get("code"), code_verifier: pending.verifier });
+      skills = null; save(K.skills, null);
+      await loadSkills(true);
+      busy = false;
+      // Login kam aus einem anderen Tool -> dorthin zurück
+      const ret = new URL(pending.ret, location.href);
+      if (ret.pathname !== location.pathname) { save("lincolnsoft.sso.fresh", true); location.replace(ret.href); return true; }
+      if (ret.hash && ret.hash !== location.hash) {        // z. B. #34 – CCP leitet ohne Hash zurück
+        history.replaceState(null, "", location.pathname + ret.hash);
+        dispatchEvent(new HashChangeEvent("hashchange"));
+      }
+      return "fresh";
+    } catch (e) {
+      error = `Anmeldung fehlgeschlagen (${String(e.message || e)})`;
+      auth = null; save(K.auth, null);
+      return true;
+    } finally {
+      busy = false;
+    }
+  }
+
+  // ---- Anzeige im Header
+  const INFO = `
+    <h4>Ist der Login sicher?</h4>
+    <ul>
+      <li>Du meldest dich <b>direkt bei CCP</b> an – auf <code>login.eveonline.com</code>. Dein Passwort sieht diese Seite nie. Prüf ruhig die Adresszeile.</li>
+      <li>Berechtigung: <b>nur Skills lesen</b> (<code>esi-skills.read_skills.v1</code>). Kein Zugriff auf Wallet, Assets, Mails oder Standort – CCP zeigt dir das vor der Bestätigung an.</li>
+      <li><b>Kein Server, keine Datenbank:</b> Die Seite ist eine statische Datei auf GitHub Pages. Token und Skills bleiben im <b>localStorage deines Browsers</b> und werden an niemanden übertragen – auch nicht an den Betreiber.</li>
+      <li>Für den Login spricht dein Browser nur mit <code>login.eveonline.com</code> und <code>esi.evetech.net</code> (dazu Bilder von <code>images.evetech.net</code>; Schriften liegen auf dieser Seite selbst). Nachprüfbar mit F12 → Netzwerk.</li>
+      <li><b>Quellcode offen:</b> <a href="https://github.com/markussauck-hub/eve-price-checker/blob/main/web/index.html" target="_blank" rel="noopener">Price Checker</a> · <a href="https://github.com/markussauck-hub/eve-invention-helper/blob/main/index.html" target="_blank" rel="noopener">Invention Helper</a> – Abschnitt „EVE SSO“.</li>
+      <li><b>Jederzeit widerrufbar:</b> ABMELDEN löscht alles im Browser und widerruft das Token bei CCP. Oder direkt bei CCP unter <a href="https://community.eveonline.com/support/third-party-applications/" target="_blank" rel="noopener">Third-Party Applications</a>.</li>
+    </ul>
+    <div class="foot">Der Login ist freiwillig – ohne ihn funktioniert alles, Skills trägst du dann von Hand ein.</div>`;
+  let infoOpen = false;
+  const infoHtml = (label) => `<button class="sso-info" id="sso-info" type="button" aria-expanded="${infoOpen}" aria-controls="sso-pop">${label}</button>
+    <div class="sso-pop" id="sso-pop" role="dialog" aria-label="Sicherheit des EVE-Logins"${infoOpen ? "" : " hidden"}>${INFO}</div>`;
+  function wireInfo(el) {
+    el.querySelector("#sso-info").onclick = (ev) => { ev.stopPropagation(); infoOpen = !infoOpen; paint(); };
+    el.querySelector("#sso-pop").onclick = (ev) => ev.stopPropagation();
+  }
+  addEventListener("click", () => { if (infoOpen) { infoOpen = false; paint(); } });
+  addEventListener("keydown", (ev) => { if (ev.key === "Escape" && infoOpen) { infoOpen = false; paint(); } });
+
+  function paint() {
+    const el = document.getElementById("sso");
+    if (!el) return;
+    if (!auth) {
+      el.innerHTML = `${error ? `<span class="sso-err">${error.replace(/</g, "&lt;")}</span>` : ""}
+        ${infoHtml("ⓘ IST DIE ANMELDUNG SICHER?")}
+        <button class="linkbtn" id="sso-login" type="button" title="Optional: Skills deines Charakters automatisch übernehmen (nur Lesezugriff auf Skills)">${busy ? "ANMELDUNG …" : "MIT EVE ANMELDEN"}</button>`;
+      el.querySelector("#sso-login").onclick = () => login();
+      wireInfo(el);
+      return;
+    }
+    const age = skills?.at ? Math.round((Date.now() - skills.at) / 60000) : null;
+    el.innerHTML = `
+      <img class="sso-portrait" src="https://images.evetech.net/characters/${auth.id}/portrait?size=64" alt="">
+      <span class="sso-name" title="${busy ? "Lade Skills …" : skills ? `Skills geladen${age ? ` vor ${age} min` : ""}` : "Skills nicht geladen"}">${auth.name.replace(/</g, "&lt;")}</span>
+      ${error ? `<span class="sso-err" title="${error.replace(/"/g, "&quot;")}">!</span>` : ""}
+      <button class="linkbtn" id="sso-reload" type="button" title="Skills neu laden"${busy ? " disabled" : ""}>${busy ? "…" : "↻"}</button>
+      ${infoHtml("ⓘ")}
+      <button class="linkbtn" id="sso-logout" type="button" title="Abmelden – Token und Skills werden aus dem Browser gelöscht">ABMELDEN</button>`;
+    el.querySelector("#sso-reload").onclick = async () => { await loadSkills(true); emit(); };
+    el.querySelector("#sso-logout").onclick = () => logout();
+    wireInfo(el);
+  }
+
+  // ---- Start
+  auth = load(K.auth); skills = load(K.skills);
+  if (skills && auth && skills.id !== auth.id) skills = null;
+  const ready = (async () => {
+    paint();
+    let fresh = false;
+    const cb = await handleCallback();
+    if (cb === true) { emit(); return; }          // Fehler oder Weiterleitung läuft
+    if (cb === "fresh") fresh = true;
+    if (load("lincolnsoft.sso.fresh")) { fresh = true; save("lincolnsoft.sso.fresh", null); }
+    if (auth) await loadSkills();
+    emit(fresh);
+  })();
+
+  return {
+    ready, login, logout, state,
+    onChange(cb) { listeners.push(cb); },
+    level(id) { return skills?.levels?.[id] ?? null; },
+  };
+})();
+
+// Skills aus dem EVE-Login übernehmen: Accounting (16622) -> Sales Tax
+EveSSO.onChange(({ char, skills }) => {
+  const lv = skills?.[16622];
+  if (char && lv != null) {
+    accounting = lv; $("acct").value = String(lv); store.set("accounting", lv); acctChar = char.name;
+  } else acctChar = null;
+  updateTaxInfo();
+  if (results) renderRoutes();
+});
+init();
+</script>
+</body>
+</html>
