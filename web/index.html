@@ -360,6 +360,13 @@
   .hub .row.avg .v { font-size: 13px; font-weight: 500; }
   .hub .row.avg:nth-of-type(3) { border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; padding-top: 5px; }
   .hub .err { color: var(--neg); font-size: 12px; margin-top: 4px; }
+  .hub .row.vol { min-height: 22px; }
+  .hub .row.vol .k { font-size: 12px; }
+  .hub .row.vol .k .small { font-size: 10px; letter-spacing: .04em; opacity: .75; margin-left: 4px; }
+  .hub .row.vol .v { font-size: 13px; font-weight: 500; }
+  .hub .row.vol .isk { font: 500 11px var(--mono); color: var(--muted); margin-left: 8px; }
+  .hub .row.vol.first { border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; padding-top: 5px; }
+  @media (max-width: 640px) { .hub .row.vol .k .small { display: none; } }
 
   /* ---------- Order-Popup ("View Market Details") ---------- */
   .card.hub h3 { margin-bottom: 6px; }
@@ -739,6 +746,7 @@ const STATIONS = [
   { name: "Dodixie IX", station: 60011866, region: 10000032 },
   { name: "Rens VI",    station: 60004588, region: 10000030 },
 ];
+const REGION_NAMES = { 10000002: "The Forge", 10000043: "Domain", 10000032: "Sinq Laison", 10000030: "Heimatar" };
 // Auf dem Lincolnsoft Server (lincolnsoft.de) bleiben Links und EVE-Login auf dem Server,
 // sonst (GitHub Pages) wie bisher auf github.io.
 const ON_LINCOLNSOFT = /(^|\.)lincolnsoft\.de$/.test(location.hostname);
@@ -859,9 +867,31 @@ async function fetchOrders(region, typeId) {
   return orders;
 }
 
+// Handelsvolumen aus /markets/{region}/history/ – Tageswerte pro REGION, einmal täglich nach der Downtime aktualisiert.
+// "Tag" = letzter gemeldeter Tag (wenn nicht älter als 2 Tage), "7 T" = die 7 Tage bis einschließlich diesem Tag.
+const histCache = new Map();               // "region:typeId" -> { t, h } – 1 Stunde
+const DAY = 86400000;
+async function fetchHistory(region, typeId) {
+  const key = `${region}:${typeId}`, hit = histCache.get(key);
+  if (hit && Date.now() - hit.t < 3600000) return hit.h;
+  const rows = await (await esiGet(`${ESI}/markets/${region}/history/?datasource=tranquility&type_id=${typeId}`)).json();
+  const todayUtc = Date.parse(new Date().toISOString().slice(0, 10));
+  const last = rows.length ? rows[rows.length - 1] : null;
+  const lastT = last ? Date.parse(last.date) : 0;
+  const ref = last && todayUtc - lastT <= 2 * DAY ? lastT : todayUtc - DAY;   // Bezugstag
+  const sum = (from) => rows.filter((x) => { const t = Date.parse(x.date); return t > from && t <= ref; })
+    .reduce((a, x) => ({ vol: a.vol + x.volume, isk: a.isk + x.volume * x.average, n: a.n + x.order_count }), { vol: 0, isk: 0, n: 0 });
+  const h = { date: new Date(ref).toISOString().slice(0, 10), day: sum(ref - DAY), week: sum(ref - 7 * DAY) };
+  histCache.set(key, { t: Date.now(), h });
+  return h;
+}
+
 async function fetchHub(hub, typeId) {
+  // Historie unabhängig laden: fällt sie aus, bleiben die Preise trotzdem nutzbar
+  const histP = fetchHistory(hub.region, typeId).catch((e) => ({ error: String(e.message || e).slice(0, 80) }));
   try {
-    const orders = (await fetchOrders(hub.region, typeId)).filter((o) => o.location_id === hub.station);
+    const [allOrders, hist] = await Promise.all([fetchOrders(hub.region, typeId), histP]);
+    const orders = allOrders.filter((o) => o.location_id === hub.station);
     const buyO = orders.filter((o) => o.is_buy_order), sellO = orders.filter((o) => !o.is_buy_order);
     const buys = buyO.map((o) => o.price), sells = sellO.map((o) => o.price);
     const buy = buys.length ? Math.max(...buys) : null, sell = sells.length ? Math.min(...sells) : null;
@@ -874,13 +904,13 @@ async function fetchHub(hub, typeId) {
     return { buy, sell,
              avgBuy: wavg(buyO.filter((o) => o.price >= buy / 10)),
              avgSell: wavg(sellO.filter((o) => o.price <= sell * 10)),
-             nBuy: buys.length, nSell: sells.length, error: null,
+             nBuy: buys.length, nSell: sells.length, error: null, hist,
              // für das Order-Popup ("View Market Details"): Sells aufsteigend, Buys absteigend
              sellOrders: sellO.slice().sort((a, b) => a.price - b.price),
              buyOrders: buyO.slice().sort((a, b) => b.price - a.price) };
   } catch (e) {
     return { buy: null, sell: null, avgBuy: null, avgSell: null, nBuy: 0, nSell: 0, error: String(e.message || e).slice(0, 120),
-             sellOrders: [], buyOrders: [] };
+             sellOrders: [], buyOrders: [], hist: await histP };
   }
 }
 
@@ -1082,6 +1112,8 @@ function renderSkeleton() {
       <div class="row"><span class="k">Niedrigstes Sell</span><span class="v">–</span></div>
       <div class="row avg"><span class="k">Ø Buy</span><span class="v dim">–</span></div>
       <div class="row avg"><span class="k">Ø Sell</span><span class="v dim">–</span></div>
+      <div class="row vol first"><span class="k">Volumen Tag</span><span class="v dim">–</span></div>
+      <div class="row vol"><span class="k">Volumen 7 Tage</span><span class="v dim">–</span></div>
     </div>`).join("");
 }
 
@@ -1107,9 +1139,28 @@ function renderHubs() {
       <div class="row avg" title="Durchschnitt der Buy-Orders an der Station, gewichtet nach Stückzahl (ohne Orders unter 1/10 des höchsten Buys)"><span class="k">Ø Buy</span><span class="v dim">${fmtIsk(r.avgBuy)}</span></div>
       <div class="row avg" title="Durchschnitt der Sell-Orders an der Station, gewichtet nach Stückzahl (ohne Orders über dem 10-Fachen des niedrigsten Sells)"><span class="k">Ø Sell</span><span class="v dim">${fmtIsk(r.avgSell)}</span></div>
       ${spread}
+      ${volRows(h, r.hist)}
       ${r.error ? `<div class="err">${esc(r.error)}</div>` : ""}
     </div>`;
   }).join("");
+}
+
+// große Zahlen kurz: 1,23 Mio / 4,56 Mrd / 7,89 Bio
+function fmtShort(n) {
+  const u = [[1e12, "Bio"], [1e9, "Mrd"], [1e6, "Mio"], [1e3, "Tsd"]].find(([v]) => Math.abs(n) >= v);
+  return u ? `${(n / u[0]).toLocaleString("de-DE", { maximumSignificantDigits: 3 })} ${u[1]}` : fmt(Math.round(n));
+}
+
+function volRows(hub, hist) {
+  const region = REGION_NAMES[hub.region] || "Region";
+  if (!hist) return "";
+  if (hist.error) return `<div class="row vol first"><span class="k">Handelsvolumen</span><span class="v dim" title="${esc(hist.error)}">nicht verfügbar</span></div>`;
+  const d = new Date(hist.date + "T00:00:00Z").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
+  const row = (label, s, cls) => `
+      <div class="row vol${cls}" title="Gehandelte Stückzahl in der Region ${esc(region)} (nicht nur an der Station) · ${fmt(s.n)} Abschlüsse · Umsatz ≈ ${fmtShort(s.isk)} ISK · Quelle: ESI Market History, aktualisiert einmal täglich nach der Downtime">
+        <span class="k">${label} <span class="small">${esc(region)}</span></span>
+        <span class="v${s.vol ? "" : " dim"}">${s.vol ? `${fmtShort(s.vol)} Stk<span class="isk">${fmtShort(s.isk)} ISK</span>` : "kein Handel"}</span></div>`;
+  return row(`Volumen ${d}`, hist.day, " first") + row("Volumen 7 Tage", hist.week, "");
 }
 
 function renderRoutes() {

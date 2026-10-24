@@ -32,7 +32,8 @@ with sync_playwright() as pw:
 lines = [f"Items: {count}", *hubs, *routes, f"Status: {status}",
          f"Tritanium Bau: {trit_bp}", f"Hammerhead II: {bpline}", *mats]
 print("\n".join(lines))
-ok = (not errors and "Fehler" not in status and all("ISK" in h and "Ø Buy" in h and "Ø Sell" in h for h in hubs[:1])
+ok = (not errors and "Fehler" not in status and all("ISK" in h and "Ø Buy" in h and "Ø Sell" in h and "Volumen 7 Tage" in h for h in hubs[:1])
+      and "nicht verfügbar" not in hubs[0]
       and "Nicht baubar" in trit_bp and len(mats) >= 3 and copy_ok)
 msg = "%0A".join(lines + ([f"JS-Fehler: {errors}"] if errors else []))
 print(f"::{'notice' if ok else 'error'} title=Live-Test::{msg}")
