@@ -1223,8 +1223,9 @@ function moRender(i) {
     </div>
     <div class="mo-body">
       ${r.error ? `<div class="err" style="margin-top:8px">${esc(r.error)}</div>` : ""}
-      <div class="mo-sec sell"><h5>Verkäufer (Sellers) <span class="small">${fmt(r.sellOrders.length)} Orders · ${vol(r.sellOrders)} Stück</span></h5>${moTable(r.sellOrders, false)}</div>
+      <!-- Buy vor Sell, wie in den Hub-Karten (Höchstes Buy / Niedrigstes Sell) -->
       <div class="mo-sec buy"><h5>Käufer (Buyers) <span class="small">${fmt(r.buyOrders.length)} Orders · ${vol(r.buyOrders)} Stück</span></h5>${moTable(r.buyOrders, true)}</div>
+      <div class="mo-sec sell"><h5>Verkäufer (Sellers) <span class="small">${fmt(r.sellOrders.length)} Orders · ${vol(r.sellOrders)} Stück</span></h5>${moTable(r.sellOrders, false)}</div>
     </div>`;
   $("mo-pop").querySelector(".mo-close").onclick = () => moClose(true);
   return true;
