@@ -629,6 +629,7 @@
       <nav class="toolnav" aria-label="LincolnSoft-Tools">
         <a class="btn-ghost" id="to-home" href="https://lincolnsoft.de/" title="Zurück zur Lincolnsoft Homestation"><span class="arrow">⌂</span>BACK TO HOMESTATION</a>
         <a class="btn-ghost" id="to-tool" href="https://markussauck-hub.github.io/eve-invention-helper/" title="Zum EVE Invention Helper wechseln – das aktuelle Item wird mitgenommen"><span class="arrow">⇄</span>EVE INVENTION HELPER</a>
+        <a class="btn-ghost" id="to-radar" href="https://markussauck-hub.github.io/eve-asset-radar/" title="Zum EVE Asset Radar – dein Inventar nach Preistrend"><span class="arrow">⇄</span>ASSET RADAR</a>
       </nav>
     </div>
     <div class="brand hright">
@@ -752,6 +753,7 @@ const REGION_NAMES = { 10000002: "The Forge", 10000043: "Domain", 10000032: "Sin
 const ON_LINCOLNSOFT = /(^|\.)lincolnsoft\.de$/.test(location.hostname);
 const TOOL_URL = ON_LINCOLNSOFT ? "/invention-helper/" : "https://markussauck-hub.github.io/eve-invention-helper/";
 document.getElementById("to-tool")?.setAttribute("href", TOOL_URL);
+document.getElementById("to-radar")?.setAttribute("href", ON_LINCOLNSOFT ? "/asset-radar/" : "https://markussauck-hub.github.io/eve-asset-radar/");
 if (ON_LINCOLNSOFT) document.getElementById("to-home")?.setAttribute("href", "/");
 const BASE_TAX = 0.075;          // Sales Tax ohne Skill
 const ROUTES_SHOWN = 3;
